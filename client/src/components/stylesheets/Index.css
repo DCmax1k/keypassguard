@@ -1,0 +1,53 @@
+
+.Index {
+    display: flex;
+}
+
+.leftSide {
+    width: calc(55vw - 2px);
+    height: 100%;
+}
+.rightSide {
+    width: 45vw;
+    height: 100vh;
+    overflow: hidden;
+}
+.rightSide > .slide {
+    width: 200%;
+    height: 100%;
+    transform: translateX(0);
+    display: flex;
+    color: white;
+
+
+    transition: transform 0.3s ease;
+}
+.rightSide > .slide.false {
+    transform: translateX(-50%);
+}
+
+.title {
+    margin-top: 40vh;
+    margin-left: 8vw;
+}
+.title > img {
+    width: calc(100px + 20vw)
+}
+.title > h2 {
+    color: #A1A1A1;
+    font-size: calc(5px + 2vw);
+}
+
+
+.Login {
+    height: 100%;
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 15vh;
+}
+.Login > .hr {
+    margin: 4vh 0;
+}
+
