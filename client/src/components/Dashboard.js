@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
+import SearchInput from './SearchInput';
 
 // TESTING SITE PLACEHOLDER
-const testSite = {};
+const testSite = {name: 'keypassguard.com', username: 'Dcmax1k', password: 'password1234!', note: ''};
 
 class Dashboard extends Component {
     constructor(props) {
@@ -49,13 +50,30 @@ class Dashboard extends Component {
         }
     }
 
+    search(value) {
+        console.log(value)
+    }
+
     render() {
         return this.state.loggedIn ? (
             <div className='Dashboard'>
                 <div className='body'>
                     <img src='/images/logo.svg' alt='Keypass Guard' />
                     <h3>{this.state.user.sites.length} site key{this.state.user.sites.length === 1 ? '':'s'} secure</h3>
-
+                    <div className='inputs'>
+                        <SearchInput onInput={this.search} placeholder={"Search site"} />
+                        <div>Add site</div>
+                    </div>
+                    <div className='sites'>
+                        {this.state.user.sites.map(site => {
+                            return (
+                            <div className='site'>
+                                {site.name}
+                            </div>
+                            )
+                        })}
+                    </div>
+                    
                 </div>
             </div>
         ) : (

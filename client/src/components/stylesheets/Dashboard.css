@@ -1,0 +1,19 @@
+.Dashboard {
+    height: 100%;
+    width: 100%;
+    display: flex;
+
+}
+
+.Dashboard > .body {
+    width: calc(400px + 40vw);
+    height: 100%;
+    border: 2px solid red;
+    margin: 0 auto;
+}
+
+.Dashboard > .body > .inputs {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}

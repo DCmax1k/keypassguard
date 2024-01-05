@@ -52,3 +52,39 @@
     border-radius: 15px;
     cursor: pointer;
 }
+
+.SearchInput {
+    position: relative;
+    height: 50px;
+    width: 33%;
+    background-color: transparent;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #75B2D6;
+}
+.SearchInput > .searchIcon {
+    position: absolute;
+    cursor: pointer;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 0px;
+    height: 20px;
+    margin-top: 2px;
+}
+.SearchInput > input {
+    height: 100%;
+    width: 100%;
+    background-color: transparent;
+    border: none;
+    outline: none;
+    font-size: 25px;
+    padding-left: 30px;
+    color: white;
+}
+.SearchInput > .placeholder {
+    position: absolute;
+    top: 50%;
+    left: 30px;
+    transform: translateY(-50%);
+    font-size: 25px;
+    pointer-events: none;
+}
