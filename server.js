@@ -16,6 +16,39 @@ app.use(express.json());
 app.use(express.static(__dirname + '/client/build'));
 app.use(cookieParser());
 
+// TESTING NODEMAILER
+const sendEmail = require('./routes/util/sendEmail');
+function testing() {
+    console.log('sent');
+    const link = "https://www.keypassguard.com";
+    sendEmail('dylan.caldwell35@gmail.com', 'Welcome to Keypass Guard', 
+    `
+            Hi DCmax1k!
+            <br />
+            <br />
+            Welcome to Keypass Guard! We're delighted you've chosen us to securely retain your passwords and enhance your online security.
+            <br />
+            <br />
+            To get started, please take a moment to verify your email address by clicking on the following link:
+            <br />
+            <br />
+            <div style="text-decoration: none; cursor: pointer; pointer-events: none; margin: 20px 20px; padding: 10px 30px; color: white; border-radius: 6px; background-color: #0582CA;"><a href="${link}">Verify Email</a></div>
+            <br />
+            <br />
+            This ensures that your Keypass Guard account is fully activated, and you can start enjoying the benefits of our secure password management.
+            <br />
+            <br />
+            At Keypass Guard, we prioritize the privacy and security of your data. Our commitment is to provide you with a seamless and reliable platform to manage your passwords with confidence.
+            <br />
+            <br />
+            The Keypass Guard Team
+    `);
+}
+
+//testing();
+
+
+
 // Main route
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/client/build/index.html');

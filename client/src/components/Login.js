@@ -56,12 +56,12 @@ class Login extends Component {
         return (
             <div className="Login">
                 <h1>Log in</h1>
-                <div className='hr' style={{width: "calc(100px + 45%"}}></div>
-                <Input onInput={this.changeUsername} width={"calc(100px + 40%"} placeholder={"Username or Email"} type="text" />
-                <Input onInput={this.changePassword} width={"calc(100px + 40%"} placeholder={"Password"} type="password" />
+                <div className='hr' style={{width: "calc(100px + 40%)"}}></div>
+                <Input onInput={this.changeUsername} className="indexLogin" placeholder={"Username or Email"} type="text" />
+                <Input onInput={this.changePassword} className="indexLogin" placeholder={"Password"} type="password" />
                 <div onClick={this.submitData} className='btn' style={{backgroundColor: "#DFDFDF", color: "#222222"}}>{this.state.loginBtnText}</div>
-                <div style={{marginTop: "3vh"}}>Forgot Passowrd?</div>
-                <div style={{marginTop: "3vh", marginBottom: 5}}>Don't have an account yet?</div>
+                <div style={{marginTop: "3vh", fontSize: "1.7vh"}}>Forgot Passowrd?</div>
+                <div style={{marginTop: "3vh", marginBottom: 5, fontSize: "1.7vh"}}>Don't have an account yet?</div>
                 <div onClick={this.props.switchPage} className='btn' style={{backgroundColor: "#4A7C59", color: "#FFFFFF"}}>Create an account!</div>
             </div>
         );
