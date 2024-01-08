@@ -3,6 +3,7 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
+const {sendWelcomeEmail} = require('./util/sendEmail');
 const User = require('../models/User');
 
 function validateEmail(email) {
@@ -34,6 +35,8 @@ router.post('/createaccount', async (req, res) => {
             password: hashedPassword,
         });
         await user.save();
+
+        sendWelcomeEmail(email, username, `https://www.keypassguard.com`);
 
         const jwt_token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);
         res.cookie('auth-token', jwt_token, { httpOnly: true, expires: new Date(Date.now() + 20 * 365 * 24 * 60 * 60 * 1000) }).json({ status: 'success' });
