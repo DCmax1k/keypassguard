@@ -96,6 +96,8 @@ class Dashboard extends Component {
             user,
         });
         try {
+            console.log("Sending ");
+            console.log(site);
             sendData('/dashboard/editsite', {site});
         } catch(err) {
             console.error(err);

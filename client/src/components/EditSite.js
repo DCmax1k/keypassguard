@@ -36,7 +36,10 @@ class EditSite extends Component {
     }
 
     updateParentSite() {
-        this.props.updateParentSite(this.getCurrentSite());
+        const site = this.getCurrentSite();
+        console.log("Updatig parent with: ");
+        console.log(site);
+        this.props.updateParentSite(site);
     }
 
     getCurrentSite() {
@@ -53,25 +56,21 @@ class EditSite extends Component {
         this.setState({
             name,
         });
-        this.updateParentSite();
     }
     changeUsername(username) {
         this.setState({
             username,
         });
-        this.updateParentSite();
     }
     changePassword(password) {
         this.setState({
             password,
         });
-        this.updateParentSite();
     }
     changeNote(note) {
         this.setState({
             note,
         });
-        this.updateParentSite();
     }
 
     goBack() {
@@ -82,6 +81,10 @@ class EditSite extends Component {
     }
 
     unlockEdit() {
+        if (!this.state.inputsLocked) {
+            // Edit done, update parent
+            this.updateParentSite();
+        }
         this.setState({
             inputsLocked: !this.state.inputsLocked,
         });

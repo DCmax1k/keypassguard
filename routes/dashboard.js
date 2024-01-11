@@ -13,7 +13,7 @@ router.post('/addsite', authToken, async (req, res) => {
             id: Math.random() + Date.now(),
             name: '',
             username: '',
-            passowrd: '',
+            password: '',
             note: '',
         }
         user.sites.push(newSite);
@@ -50,11 +50,13 @@ router.post('/deletesite', authToken, async (req, res) => {
 router.post('/editsite', authToken, async (req, res) => {
     try {
         const user = await User.findById(req.userId);
+        const sites = user.sites;
 
-        const ind = user.sites.findIndex((s) => {return s.id === req.body.site.id});
+        const ind = sites.findIndex((s) => {return s.id === req.body.site.id});
         if (ind > -1) {
-            user.sites[ind] = req.body.site;
+            sites[ind] = req.body.site;
         }
+        user.sites = sites;
         await user.save();
         res.json({
             status: 'success',
