@@ -33,6 +33,8 @@ const User = require('./models/User');
 const loginRoute = require('./routes/login');
 app.use('/login', loginRoute);
 
+const dashboardRoute = require('./routes/dashboard');
+app.use('/dashboard', dashboardRoute);
 
 
 app.post('/auth', authToken, async (req, res) => {

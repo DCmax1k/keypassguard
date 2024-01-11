@@ -2,18 +2,250 @@
     height: 100%;
     width: 100%;
     display: flex;
+    opacity: 0;
 
+    transition: opacity 0.3s ease;
+}
+.Dashboard.true {
+    opacity: 1;
 }
 
 .Dashboard > .body {
     width: calc(400px + 40vw);
     height: 100%;
-    border: 2px solid red;
     margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .Dashboard > .body > .inputs {
     width: 100%;
     display: flex;
     justify-content: space-between;
+}
+
+.Dashboard > .body > .logo {
+    width: 35vh;
+    margin: 4vh;
+}
+.Dashboard > .body > h3 {
+    color: #c0c0c0;
+}
+
+.Dashboard > .body > .sites {
+    width: 100%;
+    margin-top: 50px;
+    padding-bottom: 50vh;
+    height: 100vh;
+    overflow-y: scroll;
+}
+.Dashboard > .body > .sites > .siteCont {
+    height: 80px;
+    width: 100%;
+    border-bottom: 1px solid #202a30;
+    position: relative;
+}
+.Dashboard > .body > .sites > .siteCont > .site {
+    transition: background-color 0.3s ease;
+    background-color: transparent;
+    height: 100%;
+    width: 100%;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    padding-left: 30px;
+    color: white;
+    font-size: 20px;
+}
+.Dashboard > .body > .sites > .siteCont > .site:hover {
+    background-color: #053147;
+}
+.Dashboard > .body > .sites > .siteCont > img {
+    position: absolute;
+    top: 50%;
+    right: 30px;
+    transform: translateY(-50%);
+    height: 40px;
+    opacity: 0.1;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+.Dashboard > .body > .sites > .siteCont:hover > img {
+    opacity: 1;
+}
+
+.Loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 200px;
+    color: white;
+    font-size: 35px;
+
+    transition: opacity 0.3s ease;
+}
+.Loading > img {
+    height: 35px;
+    width: 35px;
+    margin-right: 20px;
+    animation: spin 1s linear infinite;
+}
+.Loading.fadeOut {
+    opacity: 0;
+}
+
+.EditSite * {
+    font-family: 'Ubuntu Mono', monospace;
+}
+.EditSite {
+    height: 90vh;
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    background-color: #051923;
+    transition: transform 0.3s ease;
+
+}
+.EditSite.open {
+    transform: translateY(0);
+}
+.EditSite.closed {
+    transform: translateY(100%);
+}
+
+.EditSite > .body {
+    width: calc(400px + 40vw);
+    height: 100%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+.EditSite > .body > .leftArrow {
+    position: absolute;
+    left: -10vh;
+    top: 4vh;
+    transform: translateY(-50%) rotate(180deg) scale(0.6);
+    height: 8vh;
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+
+    transition: opacity 0.3s ease;
+}
+.EditSite > .body > .leftArrow.true {
+    opacity: 1;
+    pointer-events: all;
+}
+.EditSite > .body > .row {
+    width: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 3vh;
+}
+.EditSite > .body > .row > .trash {
+    position: absolute;
+    height: 4vh;
+    width: 4vh;
+    border-radius: 50%;
+    border: 0.2vh solid #7D4747;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+    cursor: pointer;
+    right: 17vh;
+}
+.EditSite > .body > .row > .trash.true {
+    opacity: 0;
+}
+
+.EditSite > .body > .row.full .LockedInput {
+    width: 100%;
+}
+.EditSite > .body > .row > span {
+    width: 20%;
+    color: white;
+    font-size: 3vh;
+    padding-left: 2vh;
+}
+.EditSite .LockedInput {
+    background-color: #053147;
+    position: relative;
+    border-radius: 10px;
+    height: 8vh;
+    width: 80%;
+}
+.EditSite .LockedInput > .eye {
+    position: absolute;
+    cursor: pointer;
+    top: 50%;
+    transform: translateY(-50%);
+    right: 6vh;
+    height: 2vh;
+}
+.EditSite .LockedInput > .copy {
+    position: absolute;
+    cursor: pointer;
+    top: 50%;
+    transform: translateY(-50%);
+    right: 2vh;
+    height: 2.5vh;
+}
+.EditSite .LockedInput > .placeholder {
+    position: absolute;
+    top: 50%;
+    left: 2vh;
+    transform: translateY(-50%);
+    font-size: 2.5vh;
+    pointer-events: none;
+}
+.EditSite .LockedInput > input {
+    background-color: transparent;
+    outline: none;
+    border: none;
+    height: 100%;
+    width: 100%;
+    font-size: 2.5vh;
+    color: white;
+    padding-left: 2vh;
+
+    transition: color 0.3s ease;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0);
+    }
+    to {
+        transform: rotate(-360deg);
+    }
+}
+
+@media screen and (max-width: 700px) {
+    .Dashboard > .body {
+        width: 80vw;
+    }
+    .EditSite > .body {
+        width: 80vw;
+    }
+
+    .EditSite > .body > .row {
+        margin-bottom: 8vh;
+    }
+    .EditSite > .body > .row > span {
+        position: absolute;
+        left: 1vh;
+        top: -4vh;
+    }
+
+    .EditSite .LockedInput {
+        width: 100%;
+    }
 }

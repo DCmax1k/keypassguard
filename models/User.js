@@ -33,7 +33,8 @@ const UserSchema = new mongoose.Schema({
     settings: {
         type: Object,
         default: {
-
+            // verifyEmailCode: 123456
+            // emailVerified: false,
         }
     }
 

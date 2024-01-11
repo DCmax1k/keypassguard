@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&display=swap'); /* font-family: 'IBM Plex Mono', monospace; */
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu+Mono&display=swap'); /* font-family: 'Ubuntu Mono', monospace; */
 
 * {
     margin: 0;
@@ -7,8 +8,12 @@
     font-family: 'IBM Plex Mono', monospace;
 }
 
+html {
+    overflow: hidden;
+}
+
 .hr {
-    height: 1px;
+    height: 0.1vh;
     background-color: #75B2D6;
 }
 
@@ -92,8 +97,43 @@
     pointer-events: none;
 }
 
+.hollowBtn {
+    width: 15vh;
+    height: 4vh;
+    cursor: pointer;
+    color: white;
+    border-radius: 1000px;
+    border: 0.2vh solid #75B2D6;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-bottom: 2px;
+    font-size: 2vh;
+}
+
 @media screen and (max-width: 1160px) {
     .Input.indexLogin {
         width: 95%;
     }
 }
+
+/* SCROLLBAR */
+*::-webkit-scrollbar {
+    width: 0.4vh; 
+    height: 1.2vh;
+  }
+  *::-webkit-scrollbar-track {
+    background-color: transparent; 
+    cursor: pointer;
+  }
+  *::-webkit-scrollbar-thumb {
+    background-color: #888; 
+    border-radius: 10px;
+    cursor: pointer; 
+  }
+  *::-webkit-scrollbar-thumb:active {
+    cursor: pointer;
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: #555; 
+  }

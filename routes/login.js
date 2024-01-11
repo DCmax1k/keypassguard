@@ -29,14 +29,20 @@ router.post('/createaccount', async (req, res) => {
         if (!validatePass(password)) return res.json({status: 'error', message: 'Password must be at least 8 characters long'});
 
         const hashedPassword = await bcrypt.hash(password, 10);
+        const verifyEmailCode = Math.floor(Math.random() * 900000) + 100000;
+
         const user = new User({
             username,
             email,
             password: hashedPassword,
+            settings: {
+                verifyEmailCode,
+                emailVerified: false,
+            }
         });
         await user.save();
 
-        sendWelcomeEmail(email, username, `https://www.keypassguard.com`);
+        sendWelcomeEmail(email, username, `https://www.keypassguard.com/login/verifyemail/${user._id}/${verifyEmailCode}`);
 
         const jwt_token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);
         res.cookie('auth-token', jwt_token, { httpOnly: true, expires: new Date(Date.now() + 20 * 365 * 24 * 60 * 60 * 1000) }).json({ status: 'success' });
@@ -51,7 +57,7 @@ router.post('/', async (req, res) => {
         const { username, password } = req.body;
         let user;
         if (username.includes("@")) {
-            user = await User.findOne({email});
+            user = await User.findOne({email: username});
         } else {
             user = await User.findOne({username});
         }
@@ -79,6 +85,20 @@ router.post('/', async (req, res) => {
         console.error(err);
     }
 });
+
+router.get('/verifyemail/:userid/:verifycode', async (req, res) => {
+    try {
+        const user = await User.findById(req.params.userid);
+        if (req.params.verifycode === user.settings.verifyEmailCode) {
+            user.settings.emailVerified = true;
+            await user.save();
+            res.send('Email successfully verfied!');
+        }
+        res.send('Error verifiying email.');
+    } catch(err) {  
+        console.error(err);
+    }
+})
 
 
 function authToken(req, res, next) {
