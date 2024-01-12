@@ -114,7 +114,7 @@ class EditSite extends Component {
                 <div className='body'>
                     <img onClick={this.goBack} className={'leftArrow ' + this.state.inputsLocked} src='/images/icons/arrowRight.svg' alt='Left arrow' />
                     <div className='row full'>
-                        <LockedInput className='siteName' value={this.state.name} onInput={this.changeName} placeholder={'Site name'} type={'text'} copy={false} locked={this.state.inputsLocked} />
+                        <LockedInput className='siteName' value={this.state.name} onInput={this.changeName} placeholder={'ex. keypassguard.com'} type={'text'} copy={false} locked={this.state.inputsLocked} />
                     </div>
                     <div className='row'>
                         <span>Username</span>

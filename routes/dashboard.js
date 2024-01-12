@@ -55,6 +55,8 @@ router.post('/editsite', authToken, async (req, res) => {
         const ind = sites.findIndex((s) => {return s.id === req.body.site.id});
         if (ind > -1) {
             sites[ind] = req.body.site;
+        } else {
+            console.error('Couldnt find site!');
         }
         user.sites = sites;
         await user.save();

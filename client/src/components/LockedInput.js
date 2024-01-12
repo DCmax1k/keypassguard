@@ -5,6 +5,7 @@ class LockedInput extends Component {
         super(props);
         this.state = {
             showPassword: false,
+            copied: false,
         }
 
         this.onInput = this.onInput.bind(this);
@@ -23,7 +24,10 @@ class LockedInput extends Component {
     }
 
     copyToClipboard() {
-        console.log("copied " + this.props.value);
+        navigator.clipboard.writeText(this.props.value);
+        this.setState({
+            copied: !this.state.copied,
+        });
     }
 
     render() {
@@ -32,7 +36,7 @@ class LockedInput extends Component {
                 <div className='placeholder' style={{color: this.props.value ? this.props.value.length > 0 ? "transparent" : "#B4D0DF" : "#B4D0DF"}}>{this.props.placeholder}</div>
                 <input type={this.state.showPassword ? "text" : this.props.type} onInput={this.onInput} value={this.props.value ? this.props.value : ""} style={{pointerEvents: this.props.locked ? "none" : "all", color: this.props.locked ? "#4984A4" : "white"}} />
                 <img onClick={this.showPassword} className='eye' style={{display: this.props.type === "password" ? "block" : "none"}} src='/images/icons/eye.svg' alt='eye'/>
-                <img className='copy' onClick={this.copyToClipboard} style={{display: this.props.copy ? "block" : "none"}} src='/images/icons/copy.svg' alt='copy to clipboard' />
+                <img className={'copy ' + this.state.copied} onClick={this.copyToClipboard} style={{display: this.props.copy ? "block" : "none"}} src='/images/icons/copy.svg' alt='copy to clipboard' />
             </div>
         );
     }

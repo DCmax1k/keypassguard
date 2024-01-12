@@ -6,7 +6,7 @@ import sendData from './util/sendData';
 
 // TESTING SITE PLACEHOLDER
 const sites = [];
-for (let i = 0; i<10; i++) {
+for (let i = 0; i<7; i++) {
     const id = Math.random()+Date.now();
     const site = {id, name: 'keypassguard.com', username: 'Dcmax1k', password: 'password1234!', note: ''}
     sites.push(site);

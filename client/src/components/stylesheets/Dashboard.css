@@ -36,7 +36,7 @@
 .Dashboard > .body > .sites {
     width: 100%;
     margin-top: 50px;
-    padding-bottom: 50vh;
+    padding-bottom: calc(50px + 5vh);
     height: 100vh;
     overflow-y: scroll;
 }
@@ -198,6 +198,7 @@
     right: 2vh;
     height: 2.5vh;
 }
+
 .EditSite .LockedInput > .placeholder {
     position: absolute;
     top: 50%;
