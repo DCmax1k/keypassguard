@@ -12,6 +12,7 @@ class LockedInput extends Component {
         this.onInput = this.onInput.bind(this);
         this.showPassword = this.showPassword.bind(this);
         this.copyToClipboard = this.copyToClipboard.bind(this);
+        this.hidePassword = this.hidePassword.bind(this);
     }
 
     onInput(e) {
@@ -26,6 +27,12 @@ class LockedInput extends Component {
                 showPassword: !this.state.showPassword,
             });
         }
+    }
+
+    hidePassword() {
+        this.setState({
+            showPassword: false,
+        });
     }
 
     copyToClipboard() {

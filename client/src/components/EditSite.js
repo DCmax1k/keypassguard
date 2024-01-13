@@ -25,6 +25,8 @@ class EditSite extends Component {
         this.updateParentSite = this.updateParentSite.bind(this);
         this.deleteSite = this.deleteSite.bind(this);
         this.requestdecrypt = this.requestdecrypt.bind(this);
+
+        this.passwordRef = React.createRef();
     }
 
     setSite(site) {
@@ -34,7 +36,13 @@ class EditSite extends Component {
             username: site.username,
             password: site.password,
             note: site.note,
+
+            // Reset etc state
+            inputsLocked: true,
+            encrypted: true,
         });
+
+        this.passwordRef.current.hidePassword();
     }
 
     updateParentSite() {
@@ -82,14 +90,22 @@ class EditSite extends Component {
         });
     }
 
-    async unlockEdit() {
+    async unlockEdit(decrypted) {
         if (!this.state.inputsLocked) {
             // Clicked done, update parent
             this.updateParentSite();
         } else {
             // Clicked edit
             // Decrypt password if not already
-            await this.requestdecrypt(this.state);
+            if (decrypted) {
+                // Just added site, no need to encrypt
+                this.setState({
+                    encrypted: false,
+                });
+            } else {
+                await this.requestdecrypt(this.state);
+            }
+            
         }
         this.setState({
             inputsLocked: !this.state.inputsLocked,
@@ -108,13 +124,15 @@ class EditSite extends Component {
                     });
                     return true;
                     
+                 } else {
+                    console.log('Failed to request password.');
                  }
             } catch(err) {
                 console.error(err);
             }
 
         } else {
-            return false;
+            return true;
         }
     }
 
@@ -150,7 +168,7 @@ class EditSite extends Component {
                     </div>
                     <div className='row'>
                         <span>Password</span>
-                        <LockedInput className='password' value={this.state.password} onInput={this.changePassword} placeholder={''} type={'password'} copy={true} locked={this.state.inputsLocked} site={this.state} encrypted={this.state.encrypted} requestdecrypt={this.requestdecrypt} />
+                        <LockedInput className='password' value={this.state.password} ref={this.passwordRef} onInput={this.changePassword} placeholder={''} type={'password'} copy={true} locked={this.state.inputsLocked} site={this.state} encrypted={this.state.encrypted} requestdecrypt={this.requestdecrypt} />
                     </div>
                     <div className='row'>
                         <span>Note</span>

@@ -116,7 +116,7 @@ class Dashboard extends Component {
                     user,
                 });
                 this.setSite(site);
-                this.editSiteRef.current.unlockEdit();
+                this.editSiteRef.current.unlockEdit(true);
             }
         } catch(err) {
             console.error(err);

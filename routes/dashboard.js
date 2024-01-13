@@ -81,18 +81,31 @@ router.post('/editsite', authToken, async (req, res) => {
 router.post('/requestdecrypt', authToken, async (req, res) => {
     try {
         const user = await User.findById(req.userId);
+        const site = req.body.site;
         const sites = user.sites;
-        const ind = sites.findIndex((s) => {return s.id === req.body.site.id});
+        const ind = sites.findIndex((s) => {return s.id === site.id});
 
-        const decrypted = cryptr.decrypt(sites[ind].password);
+        let data;
+
+        if (site.password.length === 0) {
+            data = "";
+        } else {
+            const decrypted = cryptr.decrypt(sites[ind].password);
+
+            data = btoa(decrypted);
+        }
 
         res.json({
             status: 'success',
-            data: btoa(decrypted),
+            data,
         });
 
     } catch(err) {
-        console.error(err);
+        console.error('Decryption Error:', err);
+        res.status(500).json({
+            status: 'error',
+            message: 'Decryption failed',
+        });
     }
 });
 
