@@ -115,20 +115,24 @@ class EditSite extends Component {
 
     async requestdecrypt(site) {
         // Request decrypt from server
-        try {
-            const res = await sendData('/dashboard/requestdecrypt', {site});
-            if (res.status === 'success') {
-                this.setState({
-                    password: atob(res.data),
-                    encrypted: false,
-                });
-                return true;
-            
-            } else {
-                console.log('Failed to request password.');
+        if (this.state.encrypted) {
+            try {
+                const res = await sendData('/dashboard/requestdecrypt', {site});
+                if (res.status === 'success') {
+                    this.setState({
+                        password: atob(res.data),
+                        encrypted: false,
+                    });
+                    return true;
+                
+                } else {
+                    console.log('Failed to request password.');
+                }
+            } catch(err) {
+                console.error(err);
             }
-        } catch(err) {
-            console.error(err);
+        } else {
+            return true;
         }
     }
 
