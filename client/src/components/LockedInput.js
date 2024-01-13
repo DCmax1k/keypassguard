@@ -36,6 +36,7 @@ class LockedInput extends Component {
     }
 
     copyToClipboard() {
+        if (this.props.encrypted) return;
         navigator.clipboard.writeText(this.props.value);
         this.setState({
             copied: !this.state.copied,

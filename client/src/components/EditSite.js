@@ -176,7 +176,7 @@ class EditSite extends Component {
                     </div>
                     <div className='row'>
                         <div></div>
-                        <div onClick={this.unlockEdit} className='hollowBtn'>{this.state.inputsLocked ? "Edit" : "Done"}</div>
+                        <div onClick={this.unlockEdit} className='hollowBtn'>{this.state.inputsLocked ? "Edit" : "Save"}</div>
                         <img onClick={this.deleteSite} className={'trash ' + this.state.inputsLocked} src='/images/icons/trash.svg' alt='delete site' />
                     </div>
                     
