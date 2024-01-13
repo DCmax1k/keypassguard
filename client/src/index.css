@@ -111,9 +111,37 @@ html {
     font-size: 2vh;
 }
 
+.addSite {
+    margin-top: auto;
+    margin-bottom: 10px;
+}
 @media screen and (max-width: 1160px) {
     .Input.indexLogin {
         width: 95%;
+    }
+}
+
+@media screen and (max-width: 700px) {
+    .SearchInput {
+        width: 50%;
+    }
+    .SearchInput > input {
+        font-size: 2vh;
+    }
+    .SearchInput > .placeholder {
+        font-size: 2vh;
+    }
+}
+
+@media screen and (max-width: 400px) {
+    .SearchInput {
+        width: 100%;
+    }
+    .addSite {
+        position: absolute;
+        left: 50%;
+        bottom: -6vh;
+        transform: translateX(-50%);
     }
 }
 

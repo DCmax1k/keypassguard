@@ -19,11 +19,13 @@ class LockedInput extends Component {
     }
 
     async showPassword() {
-        await this.props.requestdecrypt(this.props.site);
+        const decrypted = await this.props.requestdecrypt(this.props.site);
 
-        this.setState({
-            showPassword: !this.state.showPassword,
-        });
+        if (decrypted) {
+            this.setState({
+                showPassword: !this.state.showPassword,
+            });
+        }
     }
 
     copyToClipboard() {

@@ -141,7 +141,7 @@ class Dashboard extends Component {
                     <h3>{this.state.user.sites.length} site key{this.state.user.sites.length === 1 ? '':'s'} secure</h3>
                     <div className='inputs'>
                         <SearchInput onInput={this.search} placeholder={"Search site"} />
-                        <div onClick={this.addSite} className='hollowBtn' style={{marginTop: "auto", marginBottom: 10,}}>Add site</div>
+                        <div onClick={this.addSite} className='hollowBtn addSite'>Add site</div>
                     </div>
                     <div className='sites'>
                         {this.state.user.sites.sort((a,b) => a.name === b.name ? 0 : a.name < b.name ? -1 : 1).map(site => {

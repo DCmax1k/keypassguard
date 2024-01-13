@@ -3,6 +3,7 @@
     width: 100%;
     display: flex;
     opacity: 0;
+    overflow: hidden;
 
     transition: opacity 0.3s ease;
 }
@@ -23,6 +24,7 @@
     width: 100%;
     display: flex;
     justify-content: space-between;
+    position: relative;
 }
 
 .Dashboard > .body > .logo {
@@ -102,13 +104,14 @@
     font-family: 'Ubuntu Mono', monospace;
 }
 .EditSite {
-    height: 90vh;
+    height: 88vh;
     width: 100%;
     position: absolute;
     bottom: 0;
     left: 0;
     background-color: #051923;
     transition: transform 0.3s ease;
+    padding-top: 5vh;
 
 }
 .EditSite.open {
@@ -142,6 +145,10 @@
 .EditSite > .body > .leftArrow.true {
     opacity: 1;
     pointer-events: all;
+}
+.EditSite.closed > .body > .leftArrow {
+    opacity: 0;
+    pointer-events: none;
 }
 .EditSite > .body > .row {
     width: 100%;
@@ -229,6 +236,13 @@
     }
 }
 
+@media screen and (max-width: 1000px) {
+    .EditSite > .body > .leftArrow {
+        left: 0vh;
+        top: -4vh;
+    }
+}
+
 @media screen and (max-width: 700px) {
     .Dashboard > .body {
         width: 80vw;
@@ -248,5 +262,11 @@
 
     .EditSite .LockedInput {
         width: 100%;
+    }
+}
+
+@media screen and (max-width: 400px) {
+    .Dashboard > .body > .sites {
+        margin-top: 8vh;
     }
 }
