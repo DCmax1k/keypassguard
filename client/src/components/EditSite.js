@@ -90,19 +90,20 @@ class EditSite extends Component {
         });
     }
 
-    async unlockEdit(decrypted) {
+    async unlockEdit(justAdded) {
         if (!this.state.inputsLocked) {
-            // Clicked done, update parent
+            // Clicked save, update parent
             this.updateParentSite();
         } else {
             // Clicked edit
             // Decrypt password if not already
-            if (decrypted) {
+            if (justAdded) {
                 // Just added site, no need to encrypt
                 this.setState({
                     encrypted: false,
                 });
             } else {
+                console.log('asking');
                 await this.requestdecrypt(this.state);
             }
             
@@ -113,26 +114,21 @@ class EditSite extends Component {
     }
 
     async requestdecrypt(site) {
-        if (this.state.encrypted) {
-            // Request decrypt from server
-            try {
-                const res = await sendData('/dashboard/requestdecrypt', {site});
-                 if (res.status === 'success') {
-                    this.setState({
-                        password: atob(res.data),
-                        encrypted: false,
-                    });
-                    return true;
-                    
-                 } else {
-                    console.log('Failed to request password.');
-                 }
-            } catch(err) {
-                console.error(err);
+        // Request decrypt from server
+        try {
+            const res = await sendData('/dashboard/requestdecrypt', {site});
+            if (res.status === 'success') {
+                this.setState({
+                    password: atob(res.data),
+                    encrypted: false,
+                });
+                return true;
+            
+            } else {
+                console.log('Failed to request password.');
             }
-
-        } else {
-            return true;
+        } catch(err) {
+            console.error(err);
         }
     }
 
@@ -176,7 +172,7 @@ class EditSite extends Component {
                     </div>
                     <div className='row'>
                         <div></div>
-                        <div onClick={this.unlockEdit} className='hollowBtn'>{this.state.inputsLocked ? "Edit" : "Save"}</div>
+                        <div onClick={() => this.unlockEdit(false)} className='hollowBtn'>{this.state.inputsLocked ? "Edit" : "Save"}</div>
                         <img onClick={this.deleteSite} className={'trash ' + this.state.inputsLocked} src='/images/icons/trash.svg' alt='delete site' />
                     </div>
                     
