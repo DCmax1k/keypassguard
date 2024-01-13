@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const Cryptr = require('cryptr');
+const cryptr = new Cryptr(process.env.CRYPTR_KEY);
 
 const User = require('../models/User');
 
@@ -53,8 +55,14 @@ router.post('/editsite', authToken, async (req, res) => {
         const sites = user.sites;
 
         const ind = sites.findIndex((s) => {return s.id === req.body.site.id});
+        
         if (ind > -1) {
-            sites[ind] = req.body.site;
+            const encryptedPassword = cryptr.encrypt(req.body.site.password);
+            
+            sites[ind] = {
+                ...req.body.site,
+                password: encryptedPassword,
+                };
         } else {
             console.error('Couldnt find site!');
         }
@@ -63,6 +71,24 @@ router.post('/editsite', authToken, async (req, res) => {
         res.json({
             status: 'success',
 
+        });
+
+    } catch(err) {
+        console.error(err);
+    }
+});
+
+router.post('/requestdecrypt', authToken, async (req, res) => {
+    try {
+        const user = await User.findById(req.userId);
+        const sites = user.sites;
+        const ind = sites.findIndex((s) => {return s.id === req.body.site.id});
+
+        const decrypted = cryptr.decrypt(sites[ind].password);
+
+        res.json({
+            status: 'success',
+            data: btoa(decrypted),
         });
 
     } catch(err) {

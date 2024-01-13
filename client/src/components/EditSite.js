@@ -13,6 +13,7 @@ class EditSite extends Component {
             note: '',
 
             inputsLocked: true,
+            encrypted: true,
         }
 
         this.changeName = this.changeName.bind(this);
@@ -23,6 +24,7 @@ class EditSite extends Component {
         this.unlockEdit = this.unlockEdit.bind(this);
         this.updateParentSite = this.updateParentSite.bind(this);
         this.deleteSite = this.deleteSite.bind(this);
+        this.requestdecrypt = this.requestdecrypt.bind(this);
     }
 
     setSite(site) {
@@ -80,14 +82,40 @@ class EditSite extends Component {
         });
     }
 
-    unlockEdit() {
+    async unlockEdit() {
         if (!this.state.inputsLocked) {
-            // Edit done, update parent
+            // Clicked done, update parent
             this.updateParentSite();
+        } else {
+            // Clicked edit
+            // Decrypt password if not already
+            await this.requestdecrypt(this.state);
         }
         this.setState({
             inputsLocked: !this.state.inputsLocked,
         });
+    }
+
+    async requestdecrypt(site) {
+        if (this.state.encrypted) {
+            // Request decrypt from server
+            try {
+                const res = await sendData('/dashboard/requestdecrypt', {site});
+                 if (res.status === 'success') {
+                    this.setState({
+                        password: atob(res.data),
+                        encrypted: false,
+                    });
+                    return true;
+                    
+                 }
+            } catch(err) {
+                console.error(err);
+            }
+
+        } else {
+            return false;
+        }
     }
 
     deleteSite() {
@@ -122,7 +150,7 @@ class EditSite extends Component {
                     </div>
                     <div className='row'>
                         <span>Password</span>
-                        <LockedInput className='password' value={this.state.password} onInput={this.changePassword} placeholder={''} type={'password'} copy={true} locked={this.state.inputsLocked} />
+                        <LockedInput className='password' value={this.state.password} onInput={this.changePassword} placeholder={''} type={'password'} copy={true} locked={this.state.inputsLocked} site={this.state} encrypted={this.state.encrypted} requestdecrypt={this.requestdecrypt} />
                     </div>
                     <div className='row'>
                         <span>Note</span>

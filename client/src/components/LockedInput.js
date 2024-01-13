@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import sendData from './util/sendData';
 
 class LockedInput extends Component {
     constructor(props) {
@@ -17,7 +18,9 @@ class LockedInput extends Component {
         this.props.onInput(e.target.value);
     }
 
-    showPassword() {
+    async showPassword() {
+        await this.props.requestdecrypt(this.props.site);
+
         this.setState({
             showPassword: !this.state.showPassword,
         });
@@ -31,10 +34,16 @@ class LockedInput extends Component {
     }
 
     render() {
+            let value = this.props.value ? this.props.value : "";
+            if (this.props.type === 'password') {
+                if (this.props.encrypted) {
+                    value = "PASSWORDPASSWORD";
+                }
+            }
         return (
             <div className={'LockedInput ' + this.props.className} style={{width: this.props.width}}>
                 <div className='placeholder' style={{color: this.props.value ? this.props.value.length > 0 ? "transparent" : "#B4D0DF" : "#B4D0DF"}}>{this.props.placeholder}</div>
-                <input type={this.state.showPassword ? "text" : this.props.type} onInput={this.onInput} value={this.props.value ? this.props.value : ""} style={{pointerEvents: this.props.locked ? "none" : "all", color: this.props.locked ? "#4984A4" : "white"}} />
+                <input type={this.state.showPassword ? "text" : this.props.type} onInput={this.onInput} value={value} style={{pointerEvents: this.props.locked ? "none" : "all", color: this.props.locked ? "#4984A4" : "white"}} />
                 <img onClick={this.showPassword} className='eye' style={{display: this.props.type === "password" ? "block" : "none"}} src='/images/icons/eye.svg' alt='eye'/>
                 <img className={'copy ' + this.state.copied} onClick={this.copyToClipboard} style={{display: this.props.copy ? "block" : "none"}} src='/images/icons/copy.svg' alt='copy to clipboard' />
             </div>

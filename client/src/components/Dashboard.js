@@ -41,7 +41,6 @@ class Dashboard extends Component {
                 const user = checkLogin.user;
                 this.setState({
                     user,
-                    budgets: user.budgets,
                     loadingText: 'Welcome back, ' + user.username + '!',
                 });
                 setTimeout(() => {
