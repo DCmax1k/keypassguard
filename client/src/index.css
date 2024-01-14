@@ -8,7 +8,12 @@
     font-family: 'IBM Plex Mono', monospace;
 }
 
-html {
+body,
+html,
+#root,
+.App {
+    height: 100vh;
+    width: 100vw;
     overflow: hidden;
 }
 
