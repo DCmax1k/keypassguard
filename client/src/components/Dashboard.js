@@ -8,7 +8,7 @@ import sendData from './util/sendData';
 const sites = [];
 for (let i = 0; i<7; i++) {
     const id = Math.random()+Date.now();
-    const site = {id, name: 'keypassguard.com', username: 'Dcmax1k', password: 'password1234!', note: ''}
+    const site = {id, name: JSON.stringify(id), username: 'Dcmax1k', password: 'password1234!', note: ''}
     sites.push(site);
 }
 class Dashboard extends Component {
@@ -19,6 +19,7 @@ class Dashboard extends Component {
             loggedIn: false,
             loadingText: 'Loggin in...',
             fadeOut: false,
+            query: "",
 
             activeSite: null,
             siteOpen: false,
@@ -31,6 +32,7 @@ class Dashboard extends Component {
         this.updateSite = this.updateSite.bind(this);
         this.addSite = this.addSite.bind(this);
         this.deleteSite = this.deleteSite.bind(this);
+        this.search = this.search.bind(this);
     }
 
     async componentDidMount() {
@@ -68,7 +70,9 @@ class Dashboard extends Component {
     }
 
     search(value) {
-        console.log(value)
+        this.setState({
+            query: value,
+        });
     }
 
     toggleSiteWindow() {
@@ -130,6 +134,16 @@ class Dashboard extends Component {
         });
     }
 
+    filterSites(sites) {
+        const query = this.state.query;
+        if (query.length === 0) return sites;
+        const filtered = sites.filter((s) => {
+            if (s.name.includes(query)) return true;
+            return false;
+        });
+        return filtered;
+    }
+
     render() {
         return this.state.loggedIn ? (
             <div className={`Dashboard ${this.state.loggedIn}`}>
@@ -142,7 +156,7 @@ class Dashboard extends Component {
                         <div onClick={this.addSite} className='hollowBtn addSite'>Add site</div>
                     </div>
                     <div className='sites'>
-                        {this.state.user.sites.sort((a,b) => a.name === b.name ? 0 : a.name < b.name ? -1 : 1).map(site => {
+                        {this.filterSites(this.state.user.sites).sort((a,b) => a.name === b.name ? 0 : a.name < b.name ? -1 : 1).map(site => {
                             return (
                             <div className='siteCont' key={site.id}>
                                 <div onClick={() => this.setSite(site)} className='site'>
