@@ -25,6 +25,12 @@ app.get('/', (req, res) => {
 app.get('/dashboard', (req, res) => {
     res.sendFile(__dirname + '/client/build/index.html');
 });
+app.get('/login', (req, res) => {
+    res.redirect('/');
+});
+app.get('/signup', (req, res) => {
+    res.redirect('/');
+});
 
 // DB models
 const User = require('./models/User');
@@ -67,12 +73,14 @@ app.get('/sitemap.xml', async (req, res) => {
     }
 
     try {
-      const smStream = new SitemapStream({ hostname: 'https://www.keypassguard.app/' });
+      const smStream = new SitemapStream({ hostname: 'https://www.keypassguard.com/' });
       const pipeline = smStream.pipe(createGzip());
 
       smStream.write({ url: '/'});
-      smStream.write({ url: '/agreements/termsofuse'});
-      smStream.write({ url: '/agreements/privacypolicy'});
+      //smStream.write({ url: '/agreements/termsofuse'});
+      //smStream.write({ url: '/agreements/privacypolicy'});
+      smStream.write({ url: '/login'});
+      smStream.write({ url: '/signup'});
 
       // cache the response
       streamToPromise(pipeline).then(sm => sitemap = sm);
