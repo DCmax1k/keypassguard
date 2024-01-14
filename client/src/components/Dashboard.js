@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import SearchInput from './SearchInput';
 import EditSite from './EditSite';
 import sendData from './util/sendData';
+import SideBar from './SideBar';
 
 
 // TESTING SITE PLACEHOLDER
@@ -17,12 +18,14 @@ class Dashboard extends Component {
         this.state = {
             user: null,
             loggedIn: false,
-            loadingText: 'Loggin in...',
+            loadingText: 'Logging in...',
             fadeOut: false,
             query: "",
 
             activeSite: null,
             siteOpen: false,
+
+            sideBar: false,
         };
 
         this.editSiteRef = React.createRef();
@@ -33,6 +36,8 @@ class Dashboard extends Component {
         this.addSite = this.addSite.bind(this);
         this.deleteSite = this.deleteSite.bind(this);
         this.search = this.search.bind(this);
+        this.toggleSideBar = this.toggleSideBar.bind(this);
+        this.closeAllMenus = this.closeAllMenus.bind(this);
     }
 
     async componentDidMount() {
@@ -138,15 +143,43 @@ class Dashboard extends Component {
         const query = this.state.query;
         if (query.length === 0) return sites;
         const filtered = sites.filter((s) => {
-            if (s.name.includes(query)) return true;
+            if (s.name.toLowerCase().includes(query)) return true;
             return false;
         });
         return filtered;
     }
 
+    toggleSideBar() {
+        this.setState({
+            sideBar: !this.state.sideBar,
+        })
+    }
+
+    closeAllMenus() {
+        this.setState({
+            sideBar: false,
+        })
+    }
+
+    async logout() {
+        try {
+            const response = await sendData('/login/logout', {});
+            if (response.status === 'success') {
+                window.location.href = '/';
+            }
+        } catch(err) {
+            console.error(err);
+        }
+    }
+
     render() {
+
         return this.state.loggedIn ? (
             <div className={`Dashboard ${this.state.loggedIn}`}>
+                {/* Darken screen to exit all menus */}
+                <div onClick={this.closeAllMenus} className={`darken ${this.state.sideBar}`}>
+
+                </div>
                 {/* Body */}
                 <div className='body'>
                     <img className='logo' src='/images/logo.svg' alt='Keypass Guard' />
@@ -170,6 +203,8 @@ class Dashboard extends Component {
                     </div>
                     
                 </div>
+                <img onClick={this.toggleSideBar} className='profileBtn' src="/images/profile.svg" alt='profile settings' />
+                <SideBar logout={this.logout} user={this.state.user} toggle={this.toggleSideBar} sideBar={this.state.sideBar} />
 
                 {/* Edit site */}
                 <EditSite ref={this.editSiteRef} open={this.state.siteOpen} goBack={this.toggleSiteWindow} updateParentSite={this.updateSite} deleteSite={this.deleteSite} />

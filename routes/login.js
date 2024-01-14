@@ -98,7 +98,15 @@ router.get('/verifyemail/:userid/:verifycode', async (req, res) => {
     } catch(err) {  
         console.error(err);
     }
-})
+});
+
+router.post('/logout', authToken, async (req, res) => {
+    try {
+        res.cookie('auth-token', '', { expires: new Date(0) }).json({ status: 'success' });
+    } catch(err) {
+        console.error(err);
+    }
+});
 
 
 function authToken(req, res, next) {
