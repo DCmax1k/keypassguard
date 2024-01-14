@@ -46,8 +46,8 @@ async function sendEmail(to, subject, message) {
     return;
 }
 
-function sendWelcomeEmail(to, username, verifyLink) {
-    sendEmail(to, 'Welcome to Keypass Guard', 
+async function sendWelcomeEmail(to, username, verifyLink) {
+    await sendEmail(to, 'Welcome to Keypass Guard', 
     `
             Hi ${username}!
             <br />
@@ -69,6 +69,7 @@ function sendWelcomeEmail(to, username, verifyLink) {
             <br />
             The Keypass Guard Team
     `);
+    console.log("Email sent.");
 }
 
 module.exports = {

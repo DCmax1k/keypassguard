@@ -10,12 +10,22 @@ const mongoose = require('mongoose');
 const { SitemapStream, streamToPromise } = require('sitemap');
 const { createGzip } = require('zlib');
 
+const logger = (req, res, next) => {
+    const date = new Date();
+    const time = `[ ${date.getHours()}:${date.getMinutes()} ]`;
+    res.on('finish', () => {
+        console.log(time, req.method, req.url, res.statusCode);
+        console.log('');
+    });
+    next();
+}
+
 // Middlewares
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(__dirname + '/client/build'));
 app.use(cookieParser());
-
+app.use(logger);
 
 
 // Main route
