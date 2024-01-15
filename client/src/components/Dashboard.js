@@ -143,7 +143,7 @@ class Dashboard extends Component {
         const query = this.state.query;
         if (query.length === 0) return sites;
         const filtered = sites.filter((s) => {
-            if (s.name.toLowerCase().includes(query)) return true;
+            if (s.name.toLowerCase().includes(query.toLowerCase())) return true;
             return false;
         });
         return filtered;
