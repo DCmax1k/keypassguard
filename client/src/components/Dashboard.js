@@ -179,6 +179,10 @@ class Dashboard extends Component {
         });
     }
 
+    customAlert(message, good) {
+        // Add an alert to an array. The div is a .map the shows all alerts. Alert onComponentMount setTimeout to go away
+    }
+
     render() {
 
         return this.state.loggedIn ? (
@@ -211,7 +215,7 @@ class Dashboard extends Component {
                     
                 </div>
                 <img onClick={this.toggleSideBar} className='profileBtn' src="/images/profile.svg" alt='profile settings' />
-                <SideBar logout={this.logout} user={this.state.user} editUser={this.editUser} toggle={this.toggleSideBar} sideBar={this.state.sideBar} />
+                <SideBar logout={this.logout} user={this.state.user} editUser={this.editUser} toggle={this.toggleSideBar} sideBar={this.state.sideBar} customAlert={this.customAlert} />
 
                 {/* Edit site */}
                 <EditSite ref={this.editSiteRef} open={this.state.siteOpen} goBack={this.toggleSiteWindow} updateParentSite={this.updateSite} deleteSite={this.deleteSite} />

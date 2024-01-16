@@ -64,6 +64,7 @@ class SideBar extends Component {
                 // Update username in app
                 const user = this.props.user;
                 user.email = newValue;
+                user.settings.emailVerified = false;
                 this.props.editUser(user);
             }
         } catch(err) {
@@ -76,9 +77,9 @@ class SideBar extends Component {
         try {
             const response = await sendData('/login/changepassword', {newValue});
             if (response.status === 'success') {
-                //this.props.customAlert("Password successfully changed.")
+                //this.props.customAlert("Password successfully changed.", true)
             } else {
-                //this.props.customAlert(response.message)
+                //this.props.customAlert(response.message, false)
             }
         } catch(err) {
             console.error(err);
@@ -89,9 +90,9 @@ class SideBar extends Component {
         try {
             const response = await sendData('/dashboard/resendemail', {});
             if (response.status === 'success') {
-                //this.props.customAlert("Email sent.")
+                //this.props.customAlert("Email sent.", true)
             } else {
-                //this.props.customAlert(response.message)
+                //this.props.customAlert(response.message, false)
             }
         } catch(err) {
             console.error(err);

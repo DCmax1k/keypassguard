@@ -61,6 +61,10 @@ app.post('/auth', authToken, async (req, res) => {
             return res.json({status: 'error', message: 'Bad authentication! Redirecting...'})
         };
 
+        // Hide crucial information to not send client
+        user.password = '';
+        user.settings.verifyEmailCode = 0;
+
         res.json({
             status: 'success',
             user,
