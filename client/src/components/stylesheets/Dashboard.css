@@ -266,16 +266,14 @@
 .SideBar {
     height: 100vh;
     width: 500px;
+    min-width: 33vw;
     position: fixed;
     top: 0;
     right: 0;
     background-color: #232323;
     overflow-y: scroll;
     z-index: 3;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
+    padding: 0 1vh;
 
     transition: transform 0.3s ease;
     transform: translateX(100%);
@@ -292,7 +290,7 @@
     cursor: pointer;
 }
 .SideBar > .profileImage {
-    height: 20vh;
+    height: 10vh;
     width: 100%;
     position: relative;
     margin-top: calc(30px + 3vh);
@@ -304,25 +302,95 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    font-size: 2.5vh;
 }
 .SideBar > .profileImage > img {
     height: 100%;
 }
 .SideBar > .profileImage > h2 {
-    margin-top: 4vh;
+    margin-top: 2vh;
     color: #8FBC9D;
 }
 .SideBar > h4 {
     color: #6C6C6C;
     font-size: 1.5vh;
-    margin: 3vh;
+    margin-bottom: 2vh;
+    width: 100%;
+    text-align: center;
 }
 .SideBar > .logoutBtn {
     background-color: #D9D9D9;
     color: black;
-    padding: 2vh 4vh;
+    padding: 2vh 0;
     font-size: 2vh;
     border-radius: 2vh;
+    cursor: pointer;
+    margin: 0 auto;
+    margin-bottom: 4vh;
+    width: calc(10% + 100px);
+    text-align: center;
+}
+
+.SideBar > .inputSection {
+    width: 100%;
+}
+.SideBar > .inputSection > span {
+    width: 100%;
+    text-align: left;
+    color: rgb(169, 169, 169);
+    padding-left: 5px;
+    margin-bottom: 0.2vh;
+    font-size: 1.8vh;
+}
+.SideBar > .inputSection > input {
+    width: 100%;
+    height: 6vh;
+    outline: none;
+    border: none;
+    color: #ADADAD;
+    background-color: #313131;
+    border-radius: 1vh;
+    padding-left: 10px;
+    font-size: 2vh;
+    margin-bottom: 1vh;
+}
+.SideBar > .inputSection > input::placeholder {
+    color: #606060;
+}
+.SideBar > .inputSection > .saveBtn {
+    background-color: #1E70BC;
+    border-radius: 1vh;
+    cursor: pointer;
+    width: calc(10% + 50px);
+    height: 0vh;
+    margin-left: auto;
+    text-align: center;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: height 0.3s ease;
+    color: white;
+}
+.SideBar > .inputSection > .saveBtn.true {
+    height: 4vh;
+    margin-bottom: 1vh;
+}
+
+.SideBar > .inputSection > .underEmail {
+    font-size: 1.5vh;
+    width: 100%;
+    padding: 1vh;
+    color: #898989;
+    margin-top: -2vh;
+    
+}
+.SideBar > .inputSection > .underEmail.verified {
+    color: #40714F;
+}
+.SideBar > .inputSection > .underEmail > span.resendEmail {
+    color: #1E70BC;
+    text-decoration: underline;
     cursor: pointer;
 }
 

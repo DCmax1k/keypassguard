@@ -46,6 +46,7 @@ async function sendEmail(to, subject, message) {
     return;
 }
 
+// WELCOME EMAIL TEMPLATE
 async function sendWelcomeEmail(to, username, verifyLink) {
     await sendEmail(to, 'Welcome to Keypass Guard', 
     `
@@ -72,7 +73,36 @@ async function sendWelcomeEmail(to, username, verifyLink) {
     console.log("Email sent.");
 }
 
+// CONFIRM EMAIL TEMPLATE
+async function sendVerifyNewEmail(to, username, verifyLink) {
+    await sendEmail(to, 'Verify email', 
+    `
+            Hi ${username}!
+            <br />
+            <br />
+            We hope this message finds you well. It appears that you've recently updated your email address for your Keypass Guard account, and we want to ensure the security of your account information.
+            <br />
+            <br />
+            To complete the email change process, please take a moment to verify your new email address by clicking on the following link:
+            <br />
+            <br />
+            <a href="${verifyLink}" style="cursor: pointer; pointer-events: none; margin: 20px 20px; padding: 10px 30px; border-radius: 6px; background-color: #0582CA; text-decoration: none; color: white; ">Verify Email</a>
+            <br />
+            <br />
+            This step is crucial in confirming that the updated email is accurate and belongs to you. Your diligence in this matter ensures the continued security and accessibility of your Keypass Guard account.
+            <br />
+            If you have any questions or concerns, please don't hesitate to contact our support team.
+            <br />
+            <br />
+            Best regards,
+            <br />
+            The Keypass Guard Team
+    `);
+    console.log("Email sent.");
+}
+
 module.exports = {
     sendEmail,
     sendWelcomeEmail,
+    sendVerifyNewEmail
 }

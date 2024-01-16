@@ -6,6 +6,7 @@ const Cryptr = require('cryptr');
 const cryptr = new Cryptr(process.env.CRYPTR_KEY);
 
 const User = require('../models/User');
+const {sendWelcomeEmail, sendVerifyNewEmail} = require('./util/sendEmail');
 
 router.post('/addsite', authToken, async (req, res) => {
     try {
@@ -106,6 +107,68 @@ router.post('/requestdecrypt', authToken, async (req, res) => {
             status: 'error',
             message: 'Decryption failed',
         });
+    }
+});
+
+router.post('/changeusername', authToken, async (req, res) => {
+    try {
+        const user = await User.findById(req.userId);
+        const { newValue } = req.body;
+
+        user.username = newValue;
+        await user.save();
+
+        res.json({
+            status: 'success',
+        });
+
+    } catch(err) {
+        console.error('Decryption Error:', err);
+    }
+});
+
+router.post('/changeemail', authToken, async (req, res) => {
+    try {
+        const user = await User.findById(req.userId);
+        const { newValue } = req.body;
+
+        const { email, username } = user;
+        const verifyEmailCode = Math.floor(Math.random() * 900000) + 100000;
+
+        user.email = newValue;
+        user.settings.emailVerified = false;
+        user.settings.verifyEmailCode = verifyEmailCode;
+        await user.save();
+
+        sendVerifyNewEmail(email, username, `https://www.keypassguard.com/login/verifyemail/${user._id}/${verifyEmailCode}`);
+        
+        res.json({
+            status: 'success',
+        });
+
+    } catch(err) {
+        console.error('Decryption Error:', err);
+    }
+});
+
+router.post('/resendemail', authToken, async (req, res) => {
+    try {
+        const user = await User.findById(req.userId);
+
+        const { email, username } = user;
+        const verifyEmailCode = Math.floor(Math.random() * 900000) + 100000;
+
+        user.settings.verifyEmailCode = verifyEmailCode;
+        await user.save();
+
+        sendVerifyNewEmail(email, username, `https://www.keypassguard.com/login/verifyemail/${user._id}/${verifyEmailCode}`);
+        
+        res.json({
+            status: 'success',
+        });
+
+    } catch(err) {
+        console.error(err);
     }
 });
 

@@ -37,7 +37,6 @@ router.post('/createaccount', async (req, res) => {
             password: hashedPassword,
             settings: {
                 verifyEmailCode,
-                emailVerified: false,
             }
         });
         await user.save();
@@ -89,12 +88,16 @@ router.post('/', async (req, res) => {
 router.get('/verifyemail/:userid/:verifycode', async (req, res) => {
     try {
         const user = await User.findById(req.params.userid);
-        if (req.params.verifycode === user.settings.verifyEmailCode) {
+        console.log(req.params.verifycode);
+        console.log(user.settings.verifyEmailCode);
+        if (req.params.verifycode == user.settings.verifyEmailCode) {
             user.settings.emailVerified = true;
             await user.save();
             res.send('Email successfully verfied!');
+        } else {
+            res.send('Error verifiying email.');
         }
-        res.send('Error verifiying email.');
+        
     } catch(err) {  
         console.error(err);
     }
@@ -105,6 +108,27 @@ router.post('/logout', authToken, async (req, res) => {
         res.cookie('auth-token', '', { expires: new Date(0) }).json({ status: 'success' });
     } catch(err) {
         console.error(err);
+    }
+});
+
+router.post('/changepassword', authToken, async (req, res) => {
+    try {
+        const user = await User.findById(req.userId);
+        const { newValue } = req.body;
+
+        if (!validatePass(newValue)) return res.json({status: 'error', message: 'Password must be at least 8 characters long'});
+
+        const hashedPassword = await bcrypt.hash(newValue, 10);
+
+        user.password = hashedPassword;
+        await user.save();
+
+        res.json({
+            status: 'success',
+        });
+
+    } catch(err) {
+        console.error('Decryption Error:', err);
     }
 });
 

@@ -31,10 +31,16 @@ const UserSchema = new mongoose.Schema({
         default: [],
     },
     settings: {
-        type: Object,
-        default: {
-            // verifyEmailCode: 123456
-            // emailVerified: false,
+        verifyEmailCode: {
+            type: Number,
+        },
+        emailVerified: {
+            type: Boolean,
+            default: false,
+        },
+        emailChanged: {
+            type: Date,
+            default: Date.now(),
         }
     }
 

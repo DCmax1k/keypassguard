@@ -38,12 +38,13 @@ class Dashboard extends Component {
         this.search = this.search.bind(this);
         this.toggleSideBar = this.toggleSideBar.bind(this);
         this.closeAllMenus = this.closeAllMenus.bind(this);
+        this.editUser = this.editUser.bind(this);
     }
 
     async componentDidMount() {
         try {
             const checkLogin = await sendData('/auth', {});
-            //const checkLogin = {user: {username: 'DCmax1k', plus: false, sites, settings: {}, email: 'dylan@digitalcaldwell.com', },status: 'success',};
+            //const checkLogin = {user: {username: 'DCmax1k', plus: false, sites, settings: {emailVerified: false,}, email: 'dylan@digitalcaldwell.com', },status: 'success',};
             if (checkLogin.status === 'success') {
                 const user = checkLogin.user;
                 this.setState({
@@ -172,6 +173,12 @@ class Dashboard extends Component {
         }
     }
 
+    editUser(user) {
+        this.setState({
+            user,
+        });
+    }
+
     render() {
 
         return this.state.loggedIn ? (
@@ -204,7 +211,7 @@ class Dashboard extends Component {
                     
                 </div>
                 <img onClick={this.toggleSideBar} className='profileBtn' src="/images/profile.svg" alt='profile settings' />
-                <SideBar logout={this.logout} user={this.state.user} toggle={this.toggleSideBar} sideBar={this.state.sideBar} />
+                <SideBar logout={this.logout} user={this.state.user} editUser={this.editUser} toggle={this.toggleSideBar} sideBar={this.state.sideBar} />
 
                 {/* Edit site */}
                 <EditSite ref={this.editSiteRef} open={this.state.siteOpen} goBack={this.toggleSiteWindow} updateParentSite={this.updateSite} deleteSite={this.deleteSite} />
