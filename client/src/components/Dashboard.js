@@ -26,6 +26,7 @@ class Dashboard extends Component {
             siteOpen: false,
 
             sideBar: false,
+            alerts: [],
         };
 
         this.editSiteRef = React.createRef();
@@ -39,6 +40,9 @@ class Dashboard extends Component {
         this.toggleSideBar = this.toggleSideBar.bind(this);
         this.closeAllMenus = this.closeAllMenus.bind(this);
         this.editUser = this.editUser.bind(this);
+        this.closeAlert = this.closeAlert.bind(this);
+        this.customAlert = this.customAlert.bind(this);
+        this.applyDecay = this.applyDecay.bind(this);
     }
 
     async componentDidMount() {
@@ -180,7 +184,49 @@ class Dashboard extends Component {
     }
 
     customAlert(message, good) {
-        // Add an alert to an array. The div is a .map the shows all alerts. Alert onComponentMount setTimeout to go away
+        const id = Math.random() + '' + Date.now();
+        const alerts = this.state.alerts;
+        const alert = {
+            id,
+            txt: message,
+            status: good,
+            animate: false,
+        };
+        alerts.push(alert);
+        this.setState({
+            alerts,
+        });
+
+        if (alerts.length === 1) {
+            this.applyDecay(alert);
+        }
+    }
+
+    closeAlert(alert) {
+        const alerts = this.state.alerts;
+        let ind = alerts.findIndex((alrt) => alrt.id === alert.id);
+        if (ind < 0) return;
+        alerts[ind].animate = true;
+        this.setState({
+            alerts,
+        });
+        setTimeout(() => {
+            const updatedAlerts = this.state.alerts;
+            updatedAlerts.splice(ind, 1);
+            this.setState({
+                alerts: updatedAlerts,
+            });
+
+            if (updatedAlerts.length > 0) {
+                this.applyDecay(updatedAlerts[0]);
+            }
+        }, 300);
+    }
+
+    applyDecay(alert) {
+        setTimeout(() => {
+            this.closeAlert(alert);
+        }, 3000);
     }
 
     render() {
@@ -188,9 +234,21 @@ class Dashboard extends Component {
         return this.state.loggedIn ? (
             <div className={`Dashboard ${this.state.loggedIn}`}>
                 {/* Darken screen to exit all menus */}
-                <div onClick={this.closeAllMenus} className={`darken ${this.state.sideBar}`}>
+                <div onClick={this.closeAllMenus} className={`darken ${this.state.sideBar}`}></div>
 
+                {/* Alert messages */}
+                <div className='alerts'>
+                    {this.state.alerts.filter((al, i) => i===0).map((alert, i) => {
+                        // Auto close alert after 10 seconds
+                        return (
+                        <div className={`alert ${alert.status} ${alert.animate ? 'animate' : ''}`} key={alert.id}>
+                            <img onClick={() => this.closeAlert(alert)} src={alert.status ? '/images/icons/greenHollowX.svg' : '/images/icons/redHollowX.svg'} alt='Close notification' />
+                            {alert.txt}
+                        </div>
+                        )
+                    })}
                 </div>
+
                 {/* Body */}
                 <div className='body'>
                     <img className='logo' src='/images/logo.svg' alt='Keypass Guard' />

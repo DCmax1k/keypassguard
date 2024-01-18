@@ -24,6 +24,7 @@ class SideBar extends Component {
 
     toggle() {
         this.props.toggle();
+        // this.props.customAlert("Username successfully changed.", true) // Testing alert message
     }
 
     logout() {
@@ -44,12 +45,16 @@ class SideBar extends Component {
     async saveUsername() {
         const newValue = this.state.form.username;
         try {
-            const response = await sendData('/dashboard/changeusername', {newValue});
+            const response = await sendData('/dashboard/changeemail', {newValue});
             if (response.status === 'success') {
                 // Update username in app
                 const user = this.props.user;
                 user.username = newValue;
                 this.props.editUser(user);
+                this.props.customAlert("Username successfully changed.", true)
+                return;
+            } else {
+                this.props.customAlert(response.message, false);
             }
         } catch(err) {
             console.error(err);
@@ -66,6 +71,9 @@ class SideBar extends Component {
                 user.email = newValue;
                 user.settings.emailVerified = false;
                 this.props.editUser(user);
+                this.props.customAlert("Email changed. Please verify your email.", true)
+            } else {
+                this.props.customAlert(response.message, false);
             }
         } catch(err) {
             console.error(err);
@@ -73,14 +81,19 @@ class SideBar extends Component {
     }
 
     async savePassword() {
+        const password = this.state.form.password;
         const newValue = this.state.form.newPassword;
         try {
-            const response = await sendData('/login/changepassword', {newValue});
+            const response = await sendData('/login/changepassword', {password, newValue});
             if (response.status === 'success') {
-                //this.props.customAlert("Password successfully changed.", true)
+                this.props.customAlert("Password successfully changed.", true);
             } else {
-                //this.props.customAlert(response.message, false)
+                this.props.customAlert(response.message, false);
             }
+            this.setState({
+                password: '',
+                newPassword: '',
+            })
         } catch(err) {
             console.error(err);
         }
@@ -90,9 +103,9 @@ class SideBar extends Component {
         try {
             const response = await sendData('/dashboard/resendemail', {});
             if (response.status === 'success') {
-                //this.props.customAlert("Email sent.", true)
+                this.props.customAlert("Email sent.", true);
             } else {
-                //this.props.customAlert(response.message, false)
+                this.props.customAlert(response.message, false);
             }
         } catch(err) {
             console.error(err);

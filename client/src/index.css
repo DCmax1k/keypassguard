@@ -120,6 +120,67 @@ html,
     margin-top: auto;
     margin-bottom: 10px;
 }
+
+.alerts {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 4;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 3vh;
+    pointer-events: none;
+}
+.alerts > .alert {
+    background-color: #286243;
+    color: #88E8B4;
+    border-radius: 10000vh;
+    height: fit-content;
+    min-height: 5vh;
+    width: fit-content;
+    max-width: 95vw;
+    display: flex;
+    align-items: center;
+    justify-self: start;
+    padding: 0 1vh;
+    font-size: 1.7vh;
+    animation: slideDown cubic-bezier(.34,1.41,.67,.99) forwards 0.3s;
+    pointer-events: all;
+    text-align: center;
+}
+@keyframes slideDown {
+    0% {
+        transform: translateY(-10vh);
+    }
+    100% {
+        transform: translateY(0vh);
+    }
+}
+.alerts > .alert.animate {
+    animation: slideUp cubic-bezier(.34,1.41,.67,.99) forwards 0.3s;
+}
+@keyframes slideUp {
+    0% {
+        transform: translateY(0vh);
+    }
+    100% {
+        transform: translateY(-10vh);
+    }
+}
+.alerts > .alert > img {
+    height: 3vh;
+    width: 3vh;
+    margin-right: 1vh;
+    cursor: pointer;
+}
+.alerts > .alert.false {
+    background-color: #622828;
+    color: #E88888;
+    
+}
+
+
 @media screen and (max-width: 1160px) {
     .Input.indexLogin {
         width: 95%;

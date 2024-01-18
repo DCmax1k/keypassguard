@@ -393,7 +393,6 @@
     text-decoration: underline;
     cursor: pointer;
 }
-
 @media screen and (max-width: 1000px) {
     .EditSite > .body > .leftArrow {
         left: 0vh;

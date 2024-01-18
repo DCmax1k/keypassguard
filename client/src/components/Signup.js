@@ -54,7 +54,8 @@ class Signup extends Component {
             this.setState({
                 signupBtnText: 'Submit'
             });
-            alert(checkLogin.message);
+            //alert(checkLogin.message);
+            this.props.customAlert(checkLogin.message, false);
 
         } catch(err) {
             console.error(err);

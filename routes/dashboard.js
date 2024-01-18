@@ -13,7 +13,7 @@ router.post('/addsite', authToken, async (req, res) => {
         const user = await User.findById(req.userId);
 
         const newSite = {
-            id: Math.random() + Date.now(),
+            id: Math.random() + '' + Date.now(),
             name: '',
             username: '',
             password: '',

@@ -45,7 +45,8 @@ class Login extends Component {
             this.setState({
                 loginBtnText: 'Log in',
             });
-            alert(checkLogin.message);
+            //alert(checkLogin.message);
+            this.props.customAlert(checkLogin.message, false);
 
         } catch(err) {
             console.error(err);

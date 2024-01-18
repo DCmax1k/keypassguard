@@ -15,10 +15,15 @@ class Index extends Component {
             loginRef: React.createRef(),
             signupRef: React.createRef(),
 
+            alerts: [],
+
         }
 
         this.switchPage = this.switchPage.bind(this);
         this.keySubmit = this.keySubmit.bind(this);
+        this.closeAlert = this.closeAlert.bind(this);
+        this.customAlert = this.customAlert.bind(this);
+        this.applyDecay = this.applyDecay.bind(this);
     }
 
     async componentDidMount() {
@@ -55,9 +60,69 @@ class Index extends Component {
         });
     }
 
+    customAlert(message, good) {
+        const id = Math.random() + '' + Date.now();
+        const alerts = this.state.alerts;
+        const alert = {
+            id,
+            txt: message,
+            status: good,
+            animate: false,
+        };
+        alerts.push(alert);
+        this.setState({
+            alerts,
+        });
+
+        if (alerts.length === 1) {
+            this.applyDecay(alert);
+        }
+    }
+
+    closeAlert(alert) {
+        const alerts = this.state.alerts;
+        let ind = alerts.findIndex((alrt) => alrt.id === alert.id);
+        if (ind < 0) return;
+        alerts[ind].animate = true;
+        this.setState({
+            alerts,
+        });
+        setTimeout(() => {
+            const updatedAlerts = this.state.alerts;
+            updatedAlerts.splice(ind, 1);
+            this.setState({
+                alerts: updatedAlerts,
+            });
+
+            if (updatedAlerts.length > 0) {
+                this.applyDecay(updatedAlerts[0]);
+            }
+        }, 300);
+    }
+
+    applyDecay(alert) {
+        setTimeout(() => {
+            this.closeAlert(alert);
+        }, 3000);
+    }
+
     render() {
         return (
             <div className='Index'>
+                {/* Alert messages */}
+                <div className='alerts'>
+                    {this.state.alerts.filter((al, i) => i===0).map((alert, i) => {
+                        // Auto close alert after 10 seconds
+                        return (
+                        <div className={`alert ${alert.status} ${alert.animate ? 'animate' : ''}`} key={alert.id}>
+                            <img onClick={() => this.closeAlert(alert)} src={alert.status ? '/images/icons/greenHollowX.svg' : '/images/icons/redHollowX.svg'} alt='Close notification' />
+                            {alert.txt}
+                        </div>
+                        )
+                    })}
+                </div>
+
+                {/* INDEX */}
                 <div className='leftSide'>
                     <div className='title'>
                         <img src='/images/logo.svg' alt='Keypass Guard' />
@@ -67,8 +132,8 @@ class Index extends Component {
                 <img src='/images/verticalLine.svg' style={{height: "100vh", width: 2}} alt='Split' />
                 <div className='rightSide'>
                     <div className={`slide ${this.state.login}`}>
-                        <Login ref={this.state.loginRef} switchPage={this.switchPage} loginBtnText={this.state.loginBtnText} />
-                        <Signup ref={this.state.signupRef} switchPage={this.switchPage} signupBtnText={this.state.signupBtnText} />
+                        <Login ref={this.state.loginRef} switchPage={this.switchPage} loginBtnText={this.state.loginBtnText} customAlert={this.customAlert} />
+                        <Signup ref={this.state.signupRef} switchPage={this.switchPage} signupBtnText={this.state.signupBtnText} customAlert={this.customAlert} />
                     </div>
                 </div>
             </div>

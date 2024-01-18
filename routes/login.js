@@ -114,7 +114,15 @@ router.post('/logout', authToken, async (req, res) => {
 router.post('/changepassword', authToken, async (req, res) => {
     try {
         const user = await User.findById(req.userId);
-        const { newValue } = req.body;
+        const { newValue, password } = req.body;
+
+        const checkPass = await bcrypt.compare(password, user.password);
+        if (!checkPass) {
+            return res.json({
+                status: 'error',
+                message: 'Incorrect password!',
+            });
+        }
 
         if (!validatePass(newValue)) return res.json({status: 'error', message: 'Password must be at least 8 characters long'});
 
