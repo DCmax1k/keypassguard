@@ -140,7 +140,7 @@ router.post('/changeemail', authToken, async (req, res) => {
         user.settings.verifyEmailCode = verifyEmailCode;
         await user.save();
 
-        sendVerifyNewEmail(email, username, `https://www.keypassguard.com/login/verifyemail/${user._id}/${verifyEmailCode}`);
+        sendVerifyNewEmail(newValue, username, `https://www.keypassguard.com/login/verifyemail/${user._id}/${verifyEmailCode}`);
         
         res.json({
             status: 'success',
