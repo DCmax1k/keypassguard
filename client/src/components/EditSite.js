@@ -47,9 +47,7 @@ class EditSite extends Component {
 
     updateParentSite() {
         const site = this.getCurrentSite();
-        console.log("Updatig parent with: ");
-        console.log(site);
-        this.props.updateParentSite(site);
+        return this.props.updateParentSite(site);
     }
 
     getCurrentSite() {
@@ -93,7 +91,13 @@ class EditSite extends Component {
     async unlockEdit(justAdded) {
         if (!this.state.inputsLocked) {
             // Clicked save, update parent
-            this.updateParentSite();
+            const worked = await this.updateParentSite();
+            console.log('worked..: ', worked);
+            if (worked) {
+                this.props.customAlert('Successfully saved site.', true);
+            } else {
+                this.props.customAlert('Error occured. Please try again later.', false);
+            }
         } else {
             // Clicked edit
             // Decrypt password if not already
@@ -114,6 +118,8 @@ class EditSite extends Component {
     }
 
     async requestdecrypt(site) {
+
+        if (!site) { site = this.state; }
         // Request decrypt from server
         if (this.state.encrypted) {
             try {
@@ -123,16 +129,17 @@ class EditSite extends Component {
                         password: atob(res.data),
                         encrypted: false,
                     });
-                    return true;
+                    return atob(res.data);
                 
                 } else {
-                    console.log('Failed to request password.');
+                    this.props.customAlert('Failed to request password.', false);
                 }
             } catch(err) {
                 console.error(err);
+                this.props.customAlert('Internal error. ' + err, false);
             }
         } else {
-            return true;
+            return this.state.password;
         }
     }
 
@@ -160,19 +167,19 @@ class EditSite extends Component {
                 <div className='body'>
                     <img onClick={this.goBack} className={'leftArrow ' + this.state.inputsLocked} src='/images/icons/arrowRight.svg' alt='Left arrow' />
                     <div className='row full'>
-                        <LockedInput className='siteName' value={this.state.name} onInput={this.changeName} placeholder={'ex. keypassguard.com'} type={'text'} copy={false} locked={this.state.inputsLocked} />
+                        <LockedInput className='siteName' value={this.state.name} onInput={this.changeName} placeholder={'ex. keypassguard.com'} type={'text'} customAlert={this.props.customAlert} copy={false} locked={this.state.inputsLocked} />
                     </div>
                     <div className='row'>
                         <span>Username</span>
-                        <LockedInput className='username' value={this.state.username} onInput={this.changeUsername} placeholder={''} type={'text'} copy={true} locked={this.state.inputsLocked} />
+                        <LockedInput className='username' value={this.state.username} onInput={this.changeUsername} placeholder={''} type={'text'} customAlert={this.props.customAlert} copy={true} locked={this.state.inputsLocked} />
                     </div>
                     <div className='row'>
                         <span>Password</span>
-                        <LockedInput className='password' value={this.state.password} ref={this.passwordRef} onInput={this.changePassword} placeholder={''} type={'password'} copy={true} locked={this.state.inputsLocked} site={this.state} encrypted={this.state.encrypted} requestdecrypt={this.requestdecrypt} />
+                        <LockedInput className='password' value={this.state.password} ref={this.passwordRef} onInput={this.changePassword} placeholder={''} type={'password'} customAlert={this.props.customAlert} requestdecrypt={this.requestdecrypt} copy={true} locked={this.state.inputsLocked} site={this.state} encrypted={this.state.encrypted} />
                     </div>
                     <div className='row'>
                         <span>Note</span>
-                        <LockedInput className='note' value={this.state.note} onInput={this.changeNote} placeholder={''} type={'text'} copy={false} locked={this.state.inputsLocked} />
+                        <LockedInput className='note' value={this.state.note} onInput={this.changeNote} placeholder={''} type={'text'} customAlert={this.props.customAlert} copy={false} locked={this.state.inputsLocked} />
                     </div>
                     <div className='row'>
                         <div></div>

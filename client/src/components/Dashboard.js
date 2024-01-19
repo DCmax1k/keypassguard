@@ -109,10 +109,15 @@ class Dashboard extends Component {
             user,
         });
         try {
-            sendData('/dashboard/editsite', {site});
+            const response = await sendData('/dashboard/editsite', {site});
+            if (response.status === 'success') {
+                return true;
+            }
         } catch(err) {
             console.error(err);
+            return false;
         }
+        return true;
     }
 
     async addSite() {
@@ -171,9 +176,18 @@ class Dashboard extends Component {
             const response = await sendData('/login/logout', {});
             if (response.status === 'success') {
                 window.location.href = '/';
+            } else {
+                this.customAlert('Error connecting to server. Redirecting...', false);
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 1500);
             }
         } catch(err) {
             console.error(err);
+            this.customAlert('Error connecting to server. Redirecting...', false);
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 1500);
         }
     }
 
@@ -276,7 +290,7 @@ class Dashboard extends Component {
                 <SideBar logout={this.logout} user={this.state.user} editUser={this.editUser} toggle={this.toggleSideBar} sideBar={this.state.sideBar} customAlert={this.customAlert} />
 
                 {/* Edit site */}
-                <EditSite ref={this.editSiteRef} open={this.state.siteOpen} goBack={this.toggleSiteWindow} updateParentSite={this.updateSite} deleteSite={this.deleteSite} />
+                <EditSite ref={this.editSiteRef} open={this.state.siteOpen} goBack={this.toggleSiteWindow} updateParentSite={this.updateSite} deleteSite={this.deleteSite} customAlert={this.customAlert} />
             </div>
         ) : (
             <div className={`Loading ${this.state.fadeOut ? 'fadeOut' : ''}`}>

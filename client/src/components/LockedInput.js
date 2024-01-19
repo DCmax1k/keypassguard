@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import sendData from './util/sendData';
 
 class LockedInput extends Component {
     constructor(props) {
@@ -35,9 +34,21 @@ class LockedInput extends Component {
         });
     }
 
-    copyToClipboard() {
-        if (this.props.encrypted) return;
+    async copyToClipboard() {
+        if (this.props.type === 'password' && this.props.encrypted) {
+            const pswd = await this.props.requestdecrypt();
+            if (pswd) {
+                navigator.clipboard.writeText(pswd);
+                this.props.customAlert('Copied to clipboard.', true);
+                return;
+            } else {
+                this.props.customAlert('Error fetching password. Please try again later.', false);
+                return;
+            }
+            
+        }
         navigator.clipboard.writeText(this.props.value);
+        this.props.customAlert('Copied to clipboard.', true);
         this.setState({
             copied: !this.state.copied,
         });
