@@ -45,7 +45,7 @@ class SideBar extends Component {
     async saveUsername() {
         const newValue = this.state.form.username;
         try {
-            const response = await sendData('/dashboard/changeemail', {newValue});
+            const response = await sendData('/dashboard/changeusername', {newValue});
             if (response.status === 'success') {
                 // Update username in app
                 const user = this.props.user;
