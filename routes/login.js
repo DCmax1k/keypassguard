@@ -93,9 +93,11 @@ router.get('/verifyemail/:userid/:verifycode', async (req, res) => {
         if (req.params.verifycode == user.settings.verifyEmailCode) {
             user.settings.emailVerified = true;
             await user.save();
-            res.send('Email successfully verfied!');
+            res.redirect('/verifyemail/verifyemailsuccess')
+            //res.send('Email successfully verfied!');
         } else {
-            res.send('Error verifiying email.');
+            res.redirect('/verifyemail/verifyemailerror')
+            //res.send('Error verifiying email.');
         }
         
     } catch(err) {  

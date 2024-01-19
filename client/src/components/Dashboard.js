@@ -3,6 +3,7 @@ import SearchInput from './SearchInput';
 import EditSite from './EditSite';
 import sendData from './util/sendData';
 import SideBar from './SideBar';
+import Loading from './Loading';
 
 
 // TESTING SITE PLACEHOLDER
@@ -19,8 +20,8 @@ class Dashboard extends Component {
             user: null,
             loggedIn: false,
             loadingText: 'Logging in...',
-            fadeOut: false,
             query: "",
+            fadeIn: false,
 
             activeSite: null,
             siteOpen: false,
@@ -30,6 +31,7 @@ class Dashboard extends Component {
         };
 
         this.editSiteRef = React.createRef();
+        this.loadingRef = React.createRef();
 
         this.setSite = this.setSite.bind(this);
         this.toggleSiteWindow = this.toggleSiteWindow.bind(this);
@@ -43,6 +45,7 @@ class Dashboard extends Component {
         this.closeAlert = this.closeAlert.bind(this);
         this.customAlert = this.customAlert.bind(this);
         this.applyDecay = this.applyDecay.bind(this);
+
     }
 
     async componentDidMount() {
@@ -56,13 +59,16 @@ class Dashboard extends Component {
                     loadingText: 'Welcome back, ' + user.username + '!',
                 });
                 setTimeout(() => {
-                    this.setState({
-                        fadeOut: true,
-                    });
+                    this.loadingRef.current.fadeOut();
                     setTimeout(() => {
                         this.setState({
                             loggedIn: true,
                         });
+                        setTimeout(() => {
+                            this.setState({
+                                fadeIn: true,
+                            });
+                        }, 1);
                     }, 300);
                 }, 600);
             } else {
@@ -246,7 +252,7 @@ class Dashboard extends Component {
     render() {
 
         return this.state.loggedIn ? (
-            <div className={`Dashboard ${this.state.loggedIn}`}>
+            <div className={`Dashboard ${this.state.fadeIn}`}>
                 {/* Darken screen to exit all menus */}
                 <div onClick={this.closeAllMenus} className={`darken ${this.state.sideBar}`}></div>
 
@@ -293,10 +299,7 @@ class Dashboard extends Component {
                 <EditSite ref={this.editSiteRef} open={this.state.siteOpen} goBack={this.toggleSiteWindow} updateParentSite={this.updateSite} deleteSite={this.deleteSite} customAlert={this.customAlert} />
             </div>
         ) : (
-            <div className={`Loading ${this.state.fadeOut ? 'fadeOut' : ''}`}>
-                <img className='loading' src='/images/loading.svg' alt='loading' />
-                {this.state.loadingText}
-            </div>
+            <Loading loadingText={this.state.loadingText} ref={this.loadingRef} />
         );
     }
 }

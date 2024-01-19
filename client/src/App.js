@@ -8,6 +8,7 @@ import "./index.css";
 
 import Index from './components/Index';
 import Dashboard from './components/Dashboard';
+import Loading from './components/Loading';
 
 function App() {
   return (
@@ -18,6 +19,8 @@ function App() {
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/verifyemail/verifyemailsuccess" element={<Loading loadingText={'Email successfully verified. Redirecting...'} redirect={'/'} />} />
+          <Route path="/verifyemail/verifyemailerror" element={<Loading loadingText={'Error verifying email. Please try again later.'} redirect={'/'} />} />
         </Routes>
 
       </div>

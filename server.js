@@ -35,6 +35,12 @@ app.get('/', (req, res) => {
 app.get('/dashboard', (req, res) => {
     res.sendFile(__dirname + '/client/build/index.html');
 });
+app.get("/verifyemail/verifyemailsuccess", (req, res) => {
+    res.sendFile(__dirname + '/client/build/index.html');
+});
+app.get("/verifyemail/verifyemailerror", (req, res) => {
+    res.sendFile(__dirname + '/client/build/index.html');
+});
 app.get('/login', (req, res) => {
     res.redirect('/');
 });
