@@ -20,7 +20,7 @@ function App() {
           <Route path="/" element={<Index />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/verifyemail/verifyemailsuccess" element={<Loading loadingText={'Email successfully verified. Redirecting...'} redirect={'/'} />} />
-          <Route path="/verifyemail/verifyemailerror" element={<Loading loadingText={'Error verifying email. Please try again later.'} redirect={'/'} />} />
+          <Route path="/verifyemail/verifyemailerror" element={<Loading loadingText={'Error verifying email. Please try again later.'} />} />
         </Routes>
 
       </div>

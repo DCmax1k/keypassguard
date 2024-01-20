@@ -20,6 +20,7 @@ class SideBar extends Component {
          this.saveUsername = this.saveUsername.bind(this);
          this.saveEmail = this.saveEmail.bind(this);
          this.savePassword = this.savePassword.bind(this);
+         this.resendEmail = this.resendEmail.bind(this);
     }
 
     toggle() {
