@@ -12,6 +12,7 @@ class LockedInput extends Component {
         this.showPassword = this.showPassword.bind(this);
         this.copyToClipboard = this.copyToClipboard.bind(this);
         this.hidePassword = this.hidePassword.bind(this);
+        this.generatePassword = this.generatePassword.bind(this);
     }
 
     onInput(e) {
@@ -54,6 +55,25 @@ class LockedInput extends Component {
         });
     }
 
+    generatePassword() {
+        const specialCharacters = '!$*#';
+        
+        // Generate random numbers and special characters
+        const randomNumber = Math.floor(Math.random() * 10);
+        const randomSpecialChar = specialCharacters.charAt(Math.floor(Math.random() * specialCharacters.length));
+        
+        // Generate the rest of the string with random characters
+        const randomString = Array.from({ length: 12 }, () => Math.random().toString(36).charAt(2)).join('');
+        
+        // Insert the random number and special character at specific positions
+        const result = `${randomString.slice(0, 4)}-${randomString.slice(4, 8)}-${randomString.slice(8, 12)}`;
+        
+        // Ensure at least one number and one special character are present
+        const finalResult = result.replace(/[0-9]/, randomNumber).replace(/[a-z]/, randomSpecialChar);
+      
+        this.onInput({target: {value: finalResult}});
+      }
+
     render() {
             let value = this.props.value ? this.props.value : "";
             if (this.props.type === 'password') {
@@ -67,6 +87,7 @@ class LockedInput extends Component {
                 <input type={this.state.showPassword ? "text" : this.props.type} onInput={this.onInput} value={value} style={{pointerEvents: this.props.locked ? "none" : "all", color: this.props.locked ? "#4984A4" : "white"}} />
                 <img onClick={this.showPassword} className='eye' style={{display: this.props.type === "password" ? "block" : "none"}} src='/images/icons/eye.svg' alt='eye'/>
                 <img className={'copy ' + this.state.copied} onClick={this.copyToClipboard} style={{display: this.props.copy ? "block" : "none"}} src='/images/icons/copy.svg' alt='copy to clipboard' />
+                <img className={`wand ${this.props.locked ? "hidden" : !this.props.wand ? "hidden" : "visible"}`} onClick={this.generatePassword} src='/images/icons/wand.svg' alt='generate random password' />
             </div>
         );
     }

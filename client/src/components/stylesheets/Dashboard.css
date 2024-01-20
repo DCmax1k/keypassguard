@@ -210,6 +210,23 @@
     right: 2vh;
     height: 2.5vh;
 }
+.EditSite .LockedInput > .wand {
+    position: absolute;
+    cursor: pointer;
+    top: 50%;
+    transform: translateY(-50%);
+    right: 11vh;
+    height: 2.5vh;
+    transition: opacity 0.3s ease;
+}
+.EditSite .LockedInput > .wand.visible {
+    opacity: 1;
+    pointer-events: all;
+}
+.EditSite .LockedInput > .wand.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
 
 .EditSite .LockedInput > .placeholder {
     position: absolute;

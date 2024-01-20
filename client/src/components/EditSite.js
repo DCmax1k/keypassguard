@@ -175,7 +175,7 @@ class EditSite extends Component {
                     </div>
                     <div className='row'>
                         <span>Password</span>
-                        <LockedInput className='password' value={this.state.password} ref={this.passwordRef} onInput={this.changePassword} placeholder={''} type={'password'} customAlert={this.props.customAlert} requestdecrypt={this.requestdecrypt} copy={true} locked={this.state.inputsLocked} site={this.state} encrypted={this.state.encrypted} />
+                        <LockedInput className='password' value={this.state.password} ref={this.passwordRef} onInput={this.changePassword} placeholder={''} type={'password'} wand={true} customAlert={this.props.customAlert} requestdecrypt={this.requestdecrypt} copy={true} locked={this.state.inputsLocked} site={this.state} encrypted={this.state.encrypted} />
                     </div>
                     <div className='row'>
                         <span>Note</span>
