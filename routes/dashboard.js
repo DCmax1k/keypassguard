@@ -155,18 +155,27 @@ router.post('/changeemail', authToken, async (req, res) => {
 router.post('/resendemail', authToken, async (req, res) => {
     try {
         const user = await User.findById(req.userId);
-
         const { email, username } = user;
-
         const time = Date.now();
+
+        const resendDelay = 1000*60; // 1 minute
+        const howLongSinceSent = time - user.settings.resentEmailLast;;
+        if (howLongSinceSent < resendDelay) {
+            return res.json({
+                status: 'blocked',
+                message: 'Please wait at least ' + Math.floor((resendDelay - howLongSinceSent)/1000) + ' more seconds before requesting a resend.',
+            });
+        }
+
         const emailChanged = user.settings.emailChanged;
         let verifyEmailCode = user.settings.verifyEmailCode;
 
         if (time - emailChanged > (1000 * 60 * 5)) {
             verifyEmailCode = Math.floor(Math.random() * 900000) + 100000;
             user.settings.verifyEmailCode = verifyEmailCode;
-            await user.save();
         }
+        user.settings.resentEmailLast = time;
+        await user.save();
 
         sendVerifyNewEmail(email, username, `https://www.keypassguard.com/login/verifyemail/${user._id}/${verifyEmailCode}`);
         

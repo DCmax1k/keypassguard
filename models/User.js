@@ -41,6 +41,9 @@ const UserSchema = new mongoose.Schema({
         emailChanged: {
             type: Date,
             default: Date.now(),
+        },
+        resentEmailLast: {
+            type: Date,
         }
     }
 
