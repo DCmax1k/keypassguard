@@ -44,7 +44,7 @@ router.post('/createaccount', async (req, res) => {
         sendWelcomeEmail(email, username, `https://www.keypassguard.com/login/verifyemail/${user._id}/${verifyEmailCode}`);
 
         const jwt_token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);
-        res.cookie('auth-token', jwt_token, { httpOnly: true, expires: new Date(Date.now() + 20 * 365 * 24 * 60 * 60 * 1000) }).json({ status: 'success' });
+        res.cookie('auth-token', jwt_token, { httpOnly: true, expires: new Date(Date.now() + /*20 * 365 * */ 24 * 60 * 60 * 1000) }).json({ status: 'success' });
 
     } catch(err) {
         console.error(err);
@@ -141,7 +141,6 @@ router.post('/changepassword', authToken, async (req, res) => {
         console.error('Decryption Error:', err);
     }
 });
-
 
 function authToken(req, res, next) {
     const token = req.cookies['auth-token'];

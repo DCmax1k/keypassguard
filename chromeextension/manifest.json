@@ -1,0 +1,30 @@
+{
+    "name": "Keypass Guard",
+    "version": "0.1.0",
+    "description": "Securly retain your passwords",
+    "permissions": ["storage", "tabs"],
+    "author": "Dylan Caldwell",
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "js": ["contentScript.js"]
+        }
+    ],
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "assets/wahtever.png"
+            ]
+        }
+    ],
+    "action": {
+        "default_icon": {
+            "16": "assets/ext-icon.png",
+            "24": "assets/ext-icon.png",
+            "32": "assets/ext-icon.png"
+        },
+        "default_title": "Keypass Guard",
+        "default_popup": "index.html"
+    },
+    "manifest_version": 3
+}

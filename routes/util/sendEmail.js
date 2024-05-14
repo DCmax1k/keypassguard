@@ -101,8 +101,30 @@ async function sendVerifyNewEmail(to, username, verifyLink) {
     console.log("Email sent.");
 }
 
+// WELCOME EMAIL TEMPLATE
+async function send2fa(to, username, code) {
+    await sendEmail(to, 'Two Facter Authentication - ' + username, 
+    `
+            Hi ${username}!
+            <br />
+            <br />
+            We are sending you this email as part of our two-factor authentication process to ensure your account remains secure. As part of this process, we require you to enter a verification code.
+            <br />
+            <br />
+            Your 6-digit verification code is: ${code}
+            <br />
+            <br />
+            Please enter this code in the designated field to access your account. If you have any questions or concerns, please don't hesitate to reach out to us.
+            <br />
+            <br />
+            The Keypass Guard Team
+    `);
+    console.log("Email sent.");
+}
+
 module.exports = {
     sendEmail,
     sendWelcomeEmail,
-    sendVerifyNewEmail
+    sendVerifyNewEmail,
+    send2fa
 }

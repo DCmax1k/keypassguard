@@ -6,6 +6,11 @@
     overflow: hidden;
 
     transition: opacity 0.3s ease;
+
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    background-color: #051923;
 }
 .Dashboard.true {
     opacity: 1;

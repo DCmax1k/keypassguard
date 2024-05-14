@@ -6,7 +6,7 @@ const Cryptr = require('cryptr');
 const cryptr = new Cryptr(process.env.CRYPTR_KEY);
 
 const User = require('../models/User');
-const {sendWelcomeEmail, sendVerifyNewEmail} = require('./util/sendEmail');
+const {sendWelcomeEmail, sendVerifyNewEmail, sendEmail, send2fa} = require('./util/sendEmail');
 
 router.post('/addsite', authToken, async (req, res) => {
     try {
@@ -109,6 +109,77 @@ router.post('/requestdecrypt', authToken, async (req, res) => {
         });
     }
 });
+router.post('/checkpass', authToken, async (req, res) => {
+    const { auth } = req.body;
+    const user = await User.findOne({_id: req.userId});
+
+    if (!user || !auth) {
+        return res.json({status: 'error', message: 'Bad authentication! Redirecting...'})
+    };
+
+    const checkPass = await bcrypt.compare(auth, user.password);
+    if (!checkPass) {
+        return res.json({
+            status: 'error',
+            message: 'Incorrect password!',
+        });
+    }
+
+    return res.json({
+        status: 'success',
+    });
+});
+router.post('/send2fa', authToken, async (req, res) => {
+    const user = await User.findOne({_id: req.userId});
+    if (!user) {
+        return res.json({status: 'error', message: 'Bad authentication! Redirecting...'})
+    };
+    const code = Math.floor((Math.random() * 900000)) + 100000;
+    user.settings.verifyEmailCode = code;
+    await user.save();
+    //console.log(code);
+    send2fa(user.email, user.username, user.settings.verifyEmailCode);
+    res.json({
+        status: 'success',
+    });
+});
+router.post('/2fa', authToken, async (req, res) => {
+    try {
+
+        const { code } = req.body;
+        const user = await User.findOne({_id: req.userId});
+
+        if (!user) {
+            return res.json({status: 'error', message: 'Bad authentication! Redirecting...'})
+        };
+        const checkCode = user.settings.verifyEmailCode === parseInt(code);
+        if (!checkCode) {
+            return res.json({
+                status: 'error',
+                message: 'Incorrect code!',
+            });
+        }
+
+        const sites = user.sites.map((site) => {
+            const decrypted = cryptr.decrypt(site.password);
+            site.password = decrypted;
+            return site;
+        });
+        const data = {
+            date: Date.now(),
+            sites,
+        }
+
+        res.json({
+            status: 'success',
+            data,
+        });
+    } catch(err) {
+        console.error(err);
+    }
+    
+});
+
 
 router.post('/changeusername', authToken, async (req, res) => {
     try {
