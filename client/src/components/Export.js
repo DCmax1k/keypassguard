@@ -29,6 +29,8 @@ class Export extends Component {
 
          this.verifyAuth = this.verifyAuth.bind(this);
          this.componentDidMount = this.componentDidMount.bind(this);
+         this.check2fa = this.check2fa.bind(this);
+         this.send2fa = this.send2fa.bind(this);
     }
 
     async componentDidMount() {
@@ -56,25 +58,39 @@ class Export extends Component {
         const input = window.prompt('Please enter the password for ' + user.username);
         const checkAuth = await sendData('/dashboard/checkpass', {auth: input});
         if (checkAuth.status === 'success') {
-            const send2fa = await sendData('/dashboard/send2fa', {});
-            if (send2fa.status === 'success') {
-                const code = window.prompt('Please enter the code sent to ' + this.state.user.username + '\'s email.');
-                this.setState({
-                    loadingText: 'Fetching...',
-                });
-                const fa2 = await sendData('/dashboard/2fa', {code: code});
-                if (fa2.status === 'success') {
-                    this.setState({
-                        data: fa2.data,
-                        auth: true,
-                    });
-                }
-            } else {
-                alert("Incorrect Code");
-            }
+            this.send2fa();
         } else {
             alert("Incorrect Pass");
-            window.location.href = '/export';
+            this.verifyAuth(user);
+        }
+    }
+
+    async send2fa() {
+        const send2fa = await sendData('/dashboard/send2fa', {});
+        if (send2fa.status === 'success') {
+            this.check2fa();
+        } else {
+            alert("Oops, something went wrong. Please try again later.");
+        }
+    }
+
+    async check2fa() {
+        const code = window.prompt('Please enter the code sent to ' + this.state.user.username + '\'s email.');
+        this.setState({
+            loadingText: 'Fetching...',
+        });
+        const fa2 = await sendData('/dashboard/2fa', {code: code});
+        if (fa2.status === 'success') {
+            this.setState({
+                data: fa2.data,
+                auth: true,
+            });
+        } else {
+            this.setState({
+                loadingText: 'Error.',
+            })
+            alert("Incorrect Code");
+            this.check2fa();
         }
     }
 
@@ -83,6 +99,9 @@ class Export extends Component {
         if (this.state.auth) {
             return (
                 <div className='Export' style={{backgroundColor: 'white', color: 'black', width: '100vw', height: 'fit-content', fontSize: 10, padding: 10}}>
+                    <div className='water' style={{width: '100%', fontSize: 12, color: 'black', textAlign: 'center', marginBottom: 5, fontWeight: 900}}>
+                        Keypass Guard - keypassguard.com
+                    </div>
                     <div key={-1} className='s' style={{ borderBottom: '1px solid black'}}>
                         <div style={{display: 'flex', justifyContent: 'flex-start', alignItems: 'flex-start', width: '100%', height: 'fit-content',}}>
                             <div className='i' style={{width: '2%'}} >-</div>
