@@ -81,7 +81,13 @@ class EditSite extends Component {
         });
     }
 
-    goBack() {
+    goBack(skip) {
+        if (!skip && !this.state.inputsLocked) {
+            const t = window.confirm("Discard changes and go back?");
+            if (!t) {
+                return;
+            }
+        }
         this.props.goBack();
         this.setState({
             inputsLocked: true,
@@ -107,7 +113,6 @@ class EditSite extends Component {
                     encrypted: false,
                 });
             } else {
-                console.log('asking');
                 await this.requestdecrypt(this.state);
             }
             
@@ -153,7 +158,7 @@ class EditSite extends Component {
             const site = this.getCurrentSite();
             const response = await sendData('/dashboard/deletesite', {site});
             if (response.status === 'success') {
-                this.goBack();
+                this.goBack(true);
                 this.props.deleteSite(site);
             }
         } catch(err) {
@@ -165,9 +170,9 @@ class EditSite extends Component {
         return (
             <div className={`EditSite ${this.props.open ? 'open' : 'closed'}`} >
                 <div className='body'>
-                    <img onClick={this.goBack} className={'leftArrow ' + this.state.inputsLocked} src='/images/icons/arrowRight.svg' alt='Left arrow' />
+                    <img onClick={() => this.goBack(false)} className={'leftArrow ' + true} src='/images/icons/arrowRight.svg' alt='Left arrow' />
                     <div className='row full'>
-                        <LockedInput className='siteName' value={this.state.name} onInput={this.changeName} placeholder={'ex. keypassguard.com'} type={'text'} customAlert={this.props.customAlert} copy={false} locked={this.state.inputsLocked} />
+                        <LockedInput className='siteName' value={this.state.name} onInput={this.changeName} placeholder={'ex. Keypass Guard'} type={'text'} customAlert={this.props.customAlert} copy={false} locked={this.state.inputsLocked} />
                     </div>
                     <div className='row'>
                         <span>Username</span>

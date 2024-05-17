@@ -12,6 +12,13 @@ router.post('/addsite', authToken, async (req, res) => {
     try {
         const user = await User.findById(req.userId);
 
+        if (!user.settings.emailVerified && user.sites.length >= 3) {
+            return res.json({
+                status: 'error',
+                message: 'Please verify your email before adding more than 3 sites!',
+            });
+        }
+
         const newSite = {
             id: Math.random() + '' + Date.now(),
             name: '',

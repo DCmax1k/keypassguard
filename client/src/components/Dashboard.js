@@ -140,6 +140,8 @@ class Dashboard extends Component {
                 });
                 this.setSite(site);
                 this.editSiteRef.current.unlockEdit(true);
+            } else {
+                this.customAlert(response.message, false);
             }
         } catch(err) {
             console.error(err);
@@ -262,7 +264,7 @@ class Dashboard extends Component {
                         // Auto close alert after 10 seconds
                         return (
                         <div className={`alert ${alert.status} ${alert.animate ? 'animate' : ''}`} key={alert.id}>
-                            <img onClick={() => this.closeAlert(alert)} src={alert.status ? '/images/icons/greenHollowX.svg' : '/images/icons/redHollowX.svg'} alt='Close notification' />
+                            <img onClick={() => this.closeAlert(alert)} src={alert.status ? '/images/icons/greenHollowCheck.svg' : '/images/icons/redHollowX.svg'} alt='Close notification' />
                             {alert.txt}
                         </div>
                         )

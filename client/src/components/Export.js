@@ -85,10 +85,13 @@ class Export extends Component {
                 data: fa2.data,
                 auth: true,
             });
+            setTimeout(() => {
+                window.print();
+            }, 500);
         } else {
             this.setState({
                 loadingText: 'Error.',
-            })
+            });
             alert("Incorrect Code");
             this.check2fa();
         }

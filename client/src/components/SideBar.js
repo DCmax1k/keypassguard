@@ -121,10 +121,19 @@ class SideBar extends Component {
                     <img src='/images/darkLock.svg' alt='lock' />
                     <h2>{this.props.user.username}</h2>
                 </div>
+
+                {/* Settings */}
                 <h4>Settings</h4>
                 <div onClick={this.logout} className='logoutBtn'>
                     Logout
                 </div>
+                <div className='export'>
+                    <a href='/export' target="_blank">
+                        <img alt='export' src='/images/icons/export.svg' />
+                        Export sites
+                    </a>
+                </div>
+                
 
                 {/* Personal information */}
                 <h4>Personal information</h4>
