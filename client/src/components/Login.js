@@ -61,7 +61,7 @@ class Login extends Component {
                 <Input onInput={this.changeUsername} className="indexLogin" placeholder={"Username or Email"} type="text" />
                 <Input onInput={this.changePassword} className="indexLogin" placeholder={"Password"} type="password" />
                 <div onClick={this.submitData} className='btn' style={{backgroundColor: "#4A7C59", color: "#FFFFFF"}}>{this.state.loginBtnText}</div>
-                <div style={{marginTop: "3vh", fontSize: "1.7vh"}}>Forgot Passowrd?</div>
+                <div style={{marginTop: "3vh", fontSize: "1.7vh"}}><a style={{color: "white", textDecoration: "none" }} href='/forgotpassword'>Forgot Passowrd?</a></div>
                 <div style={{marginTop: "3vh", marginBottom: 5, fontSize: "1.7vh"}}>Don't have an account yet?</div>
                 <div onClick={this.props.switchPage} className='btn' style={{backgroundColor: "#DFDFDF", color: "#222222"}}>Create an account!</div>
             </div>

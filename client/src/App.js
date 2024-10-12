@@ -10,6 +10,7 @@ import Index from './components/Index';
 import Dashboard from './components/Dashboard';
 import Loading from './components/Loading';
 import Export from './components/Export'
+import ForgotPassword from './components/ForgotPassword';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
 
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/forgotpassword" element={<ForgotPassword />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/export" element={<Export />} />
           <Route path="/verifyemail/verifyemailsuccess" element={<Loading loadingText={'Email successfully verified. Redirecting...'} redirect={'/'} />} />

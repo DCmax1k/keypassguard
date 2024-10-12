@@ -1,5 +1,5 @@
 
-.Index {
+.Index, .ForgotPassword {
     display: flex;
 
     height: 100vh;
