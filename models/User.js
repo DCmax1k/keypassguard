@@ -33,6 +33,7 @@ const UserSchema = new mongoose.Schema({
     settings: {
         verifyEmailCode: {
             type: Number,
+
         },
         emailVerified: {
             type: Boolean,
@@ -44,6 +45,9 @@ const UserSchema = new mongoose.Schema({
         },
         resentEmailLast: {
             type: Date,
+        },
+        forgotPassword: {
+            type: Object, // { tempCode, validUntil,  }
         }
     }
 

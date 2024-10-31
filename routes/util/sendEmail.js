@@ -122,9 +122,31 @@ async function send2fa(to, username, code) {
     console.log("Email sent.");
 }
 
+// Forgot password email
+async function sendForgotPassword(to, username, code) {
+    await sendEmail(to, 'Forgot Password - ' + username, 
+    `
+            Hi ${username}!
+            <br />
+            <br />
+            We are sending you this email because you have requested to reset your password. As part of this process, we require you to enter a verification code.
+            <br />
+            <br />
+            Your 6-digit verification code is: ${code}
+            <br />
+            <br />
+            Please enter this code in the designated field to reset the password of your account. If you have any questions or concerns, please don't hesitate to reach out to us.
+            <br />
+            <br />
+            The Keypass Guard Team
+    `);
+    console.log("Email sent.");
+}
+
 module.exports = {
     sendEmail,
     sendWelcomeEmail,
     sendVerifyNewEmail,
-    send2fa
+    send2fa,
+    sendForgotPassword
 }

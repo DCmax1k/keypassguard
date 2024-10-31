@@ -6,7 +6,7 @@ const Cryptr = require('cryptr');
 const cryptr = new Cryptr(process.env.CRYPTR_KEY);
 
 const User = require('../models/User');
-const {sendWelcomeEmail, sendVerifyNewEmail, sendEmail, send2fa} = require('./util/sendEmail');
+const {sendWelcomeEmail, sendVerifyNewEmail, sendEmail, send2fa, sendForgotPassword} = require('./util/sendEmail');
 
 router.post('/addsite', authToken, async (req, res) => {
     try {
@@ -264,6 +264,47 @@ router.post('/resendemail', authToken, async (req, res) => {
     } catch(err) {
         console.error(err);
     }
+});
+
+// forgot password
+router.post('/requesttemperarycode', async (req, res) => {
+    const email = req.body.email;
+    const user = await User.findOne({email,});
+    if (!user) {
+        return res.json({
+            status: 'error',
+            message: 'No user with that email!',
+        });
+    }
+    // Create code
+    let code = 0;
+    for (i = 0; i<=5; i++) {
+        const ranNum = Math.floor(Math.random()*10);
+        code+=ranNum*Math.pow(10, i);
+    }
+    console.log("CODE: ", code);
+
+    // Set timeout validUntil - 10 mins - (1s*1000*60*10)ms
+    const currentTime = Date.now();
+    const validUntil = currentTime + 1000*60*10;
+
+    // Save user info
+    user.settings.forgotPassword = {};
+    await user.save();
+    user.settings.forgotPassword.tempCode = code;
+    user.settings.forgotPassword.validUntil = validUntil;
+    await user.save();
+
+    // Send email
+    sendForgotPassword(email, user.username, code);
+
+    // Respond
+    res.json({
+        status: 'success',
+        message: 'An email has been sent to the given email address!',
+    });
+
+
 });
 
 function authToken(req, res, next) {
