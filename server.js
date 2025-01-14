@@ -133,6 +133,7 @@ function authToken(req, res, next) {
     jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
         if (err) return res.status(403).json({message: 'Error logging in. Incorrect information provided.'})
         req.userId = user.userId;
+        res.cookie('auth-token', token, { httpOnly: true, expires: new Date(Date.now() + 12 * 60 * 60 * 1000)});
         next();
     });
 }

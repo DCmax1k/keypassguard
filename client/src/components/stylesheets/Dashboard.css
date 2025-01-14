@@ -351,6 +351,7 @@
 }
 .export > a > img {
     height: 2vh;
+    margin-right: 10px;
 }
 
 .SideBar > .inputSection {

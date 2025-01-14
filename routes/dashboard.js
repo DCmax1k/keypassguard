@@ -277,14 +277,15 @@ router.post('/requesttemperarycode', async (req, res) => {
         });
     }
     // Create code
-    let code = 0;
+    let code = "";
     for (i = 0; i<=5; i++) {
-        const ranNum = Math.floor(Math.random()*10);
-        code+=ranNum*Math.pow(10, i);
+        const ranNum = JSON.stringify(Math.floor(Math.random()*10));
+        code+=ranNum;
+        //code+=ranNum*Math.pow(10, i);
     }
     console.log("CODE: ", code);
 
-    // Set timeout validUntil - 10 mins - (1s*1000*60*10)ms
+    // Set timeout validUntil - 10 mins - (1000*60*10)ms
     const currentTime = Date.now();
     const validUntil = currentTime + 1000*60*10;
 
@@ -303,8 +304,64 @@ router.post('/requesttemperarycode', async (req, res) => {
         status: 'success',
         message: 'An email has been sent to the given email address!',
     });
+});
+router.post('/requestchecktemperarycode', async (req, res) => {
+    const email = req.body.email;
+    const user = await User.findOne({email,});
+    if (!user) {
+        return res.json({
+            status: 'error',
+            message: 'No user with that email!',
+        });
+    }
+    // Check code
+    const code = req.body.code;
+    if (user.settings.forgotPassword.tempCode != code || user.settings.forgotPassword.validUntil < Date.now()) {
+        return res.json({
+            status: 'error',
+            message: 'Expired or Incorrect code!',
+        });
+    }
 
+    // Respond
+    res.json({
+        status: 'success',
+        message: 'Code has been successfully verified!',
+    });
+});
 
+router.post('/requestchangepassword', async (req, res) => {
+    const email = req.body.email;
+    const user = await User.findOne({email,});
+    if (!user) {
+        return res.json({
+            status: 'error',
+            message: 'No user with that email!',
+        });
+    }
+    // Check code
+    const code = req.body.code;
+    if (user.settings.forgotPassword.tempCode != code || user.settings.forgotPassword.validUntil + (5 * 60 * 60 * 1000) < Date.now()) {
+        return res.json({
+            status: 'error',
+            message: 'Expired or Incorrect code!',
+        });
+    }
+
+    // Change Password
+    const password = req.body.password;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    user.password = hashedPassword;
+
+    // Save other user info, expire code
+    user.settings.forgotPassword.validUntil = 1;
+    await user.save();
+
+    // Respond
+    res.json({
+        status: 'success',
+        message: 'Password successfully changed!',
+    });
 });
 
 function authToken(req, res, next) {
@@ -313,6 +370,7 @@ function authToken(req, res, next) {
     jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
         if (err) return res.sendStatus(403);
         req.userId = user.userId;
+        res.cookie('auth-token', token, { httpOnly: true, expires: new Date(Date.now() + 12 * 60 * 60 * 1000)});
         next();
     });
 }

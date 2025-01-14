@@ -56,21 +56,41 @@ class LockedInput extends Component {
     }
 
     generatePassword() {
-        const specialCharacters = '!$*#';
-        
-        // Generate random numbers and special characters
-        const randomNumber = Math.floor(Math.random() * 10);
-        const randomSpecialChar = specialCharacters.charAt(Math.floor(Math.random() * specialCharacters.length));
-        
-        // Generate the rest of the string with random characters
-        const randomString = Array.from({ length: 12 }, () => Math.random().toString(36).charAt(2)).join('');
-        
-        // Insert the random number and special character at specific positions
-        const result = `${randomString.slice(0, 4)}-${randomString.slice(4, 8)}-${randomString.slice(8, 12)}`;
-        
-        // Ensure at least one number and one special character are present
-        const finalResult = result.replace(/[0-9]/, randomNumber).replace(/[a-z]/, randomSpecialChar);
+        const length = 12;
+        if (length < 4) {
+          throw new Error("Password length must be at least 4 to include all required character types.");
+        }
       
+        const specialChars = "!$*#";
+        const uppercaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        const lowercaseChars = "abcdefghijklmnopqrstuvwxyz";
+        const numbers = "0123456789";
+      
+        // Ensure the password includes at least one of each required character type
+        const requiredChars = [
+          specialChars[Math.floor(Math.random() * specialChars.length)],
+          uppercaseChars[Math.floor(Math.random() * uppercaseChars.length)],
+          lowercaseChars[Math.floor(Math.random() * lowercaseChars.length)],
+          numbers[Math.floor(Math.random() * numbers.length)],
+        ];
+      
+        // Fill the rest of the password with random characters from all sets
+        const allChars = specialChars + uppercaseChars + lowercaseChars + numbers;
+        while (requiredChars.length < length) {
+          requiredChars.push(allChars[Math.floor(Math.random() * allChars.length)]);
+        }
+      
+        // Shuffle the array to randomize character order
+        for (let i = requiredChars.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [requiredChars[i], requiredChars[j]] = [requiredChars[j], requiredChars[i]];
+        }
+      
+        // Join the array into a string and return it
+        const randomString = requiredChars.join('');
+        const finalResult = `${randomString.slice(0, 4)}-${randomString.slice(4, 8)}-${randomString.slice(8, 12)}`;
+
+
         this.onInput({target: {value: finalResult}});
       }
 

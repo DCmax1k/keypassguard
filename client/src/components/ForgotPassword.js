@@ -27,6 +27,10 @@ class ForgotPassword extends Component {
         this.submitData = this.submitData.bind(this);
         this.submitCode = this.submitCode.bind(this);
         this.requestCode = this.requestCode.bind(this);
+        this.requestChangePassword = this.requestChangePassword.bind(this);
+        this.submitChangePassword = this.submitChangePassword.bind(this);
+        this.checkCode = this.checkCode.bind(this);
+        
     }
 
     customAlert(message, good) {
@@ -75,25 +79,21 @@ class ForgotPassword extends Component {
     }
 
     changeEmailInput(e) {
-        console.log(e);
         this.setState({
             emailInput: e,
         });
     }
     changeCode(e) {
-        console.log(e);
         this.setState({
             codeInput: e,
         });
     }
     changePassword(e) {
-        console.log(e);
         this.setState({
             passwordInput: e,
         });
     }
     changeConfirmPassword(e) {
-        console.log(e);
         this.setState({
             confirmPasswordInput: e,
         });
@@ -106,7 +106,60 @@ class ForgotPassword extends Component {
     }
     submitCode() {
         if (this.state.codeInput.length !== 6) return this.customAlert("Please input the full 6-digit code!", false);
-        this.checkCode({code: this.state.codeInput})
+        this.checkCode({code: this.state.codeInput, email: this.state.emailInput});
+    }
+    submitChangePassword() {
+        if (this.state.passwordInput.length < 8) return this.customAlert("Password must be at least 8 characters long.", false);
+        if (this.state.passwordInput !== this.state.confirmPasswordInput) return this.customAlert("Passwords do not match.", false);
+        this.requestChangePassword({password: this.state.passwordInput, email: this.state.emailInput, code: this.state.codeInput});
+    }
+    async requestChangePassword(data) {
+        try {
+            this.setState({
+                loginBtnText: 'Loading...',
+            });
+            const changePasswordResponse = await sendData('/dashboard/requestchangepassword', data);
+            if (changePasswordResponse.status === 'error') {
+                this.customAlert(changePasswordResponse.message, false);
+            }
+            this.setState({
+                loginBtnText: 'Submit',
+            });
+            if (changePasswordResponse.status === 'success') {
+                this.customAlert('Password changed successfully!', true);
+                this.setState({
+                    step: 1,
+                    emailInput: '',
+                    codeInput: '',
+                    passwordInput: '',
+                    confirmPasswordInput: '',
+                });
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    async checkCode(data) {
+        try {
+            this.setState({
+                loginBtnText: 'Loading...',
+            });
+            const checkCode = await sendData('/dashboard/requestchecktemperarycode', data);
+            if (checkCode.status === 'error') {
+                this.customAlert(checkCode.message, false);
+            }
+            this.setState({
+                loginBtnText: 'Submit',
+            });
+            if (checkCode.status === 'success') {
+                this.setState({
+                    step: 3,
+                });
+            }
+        } catch(err) {
+            console.error(err);
+        }
     }
 
     async requestCode(data) {
@@ -120,7 +173,7 @@ class ForgotPassword extends Component {
                 this.customAlert(checkLogin.message, false);
             }
             this.setState({
-                loginBtnText: 'Send Code',
+                loginBtnText: 'Submit',
             });
             
             if (checkLogin.status === 'success') {
@@ -138,7 +191,7 @@ class ForgotPassword extends Component {
 
     render() {
         return (
-            <div className='ForgotPassword'>
+            <div className='Index ForgotPassword'>
                 {/* Alert messages */}
                 <div className='alerts'>
                     {this.state.alerts.filter((al, i) => i===0).map((alert, i) => {
@@ -176,18 +229,18 @@ class ForgotPassword extends Component {
                                 <div key={2}>
                                     <p style={{width: '100%', textAlign: 'center', marginTop: "2vh", marginBottom: "3vh"}}>Enter the code that was sent to your inbox.</p>
                                     <Input onInput={this.changeCode} className="indexLogin" placeholder={"Code"} type="text" value={this.state.codeInput} width={"100%"} />
-                                    <div onClick={this.submitCode} className='btn' style={{backgroundColor: "#4A7C59", color: "#FFFFFF", width: 'fit-content', margin: "0 auto"}}>Submit</div>
+                                    <div onClick={this.submitCode} className='btn' style={{backgroundColor: "#4A7C59", color: "#FFFFFF", width: 'fit-content', margin: "0 auto"}}>{this.state.loginBtnText}</div>
                                 </div>
                             ) : this.state.step === 3 ? (
-                                <div key={3}>
+                                <div key={3} style={{marginTop: "2vh"}}>
                                     <Input  onInput={this.changePassword} className="indexLogin" placeholder={"New Password"} type="password" width={"100%"} />
-                                    <Input onInput={this.changeConfirmPassword} className="indexLogin" placeholder={"Confirm Password"} type="password" />
-                                    <div onClick={this.submitChangePassword} className='btn' style={{backgroundColor: "#4A7C59", color: "#FFFFFF", width: 'fit-content', margin: "0 auto"}}>Submit</div>
+                                    <Input onInput={this.changeConfirmPassword} className="indexLogin" placeholder={"Confirm Password"} type="password" width={"100%"} />
+                                    <div onClick={this.submitChangePassword} className='btn' style={{backgroundColor: "#4A7C59", color: "#FFFFFF", width: 'fit-content', margin: "0 auto"}}>{this.state.loginBtnText}</div>
                                 </div>
                             ) : null}
                         </div>
 
-                        <div style={{marginTop: "8vh", fontSize: "1.7vh"}}><a style={{color: "white", textDecoration: "underline" }} href='/'>Back to the login screen</a></div>
+                        <div style={{marginTop: "28vh", fontSize: "1.7vh"}}><a style={{color: "white", textDecoration: "underline" }} href='/'>Back to the login screen</a></div>
                     </div>
                     </div>
                 </div>
