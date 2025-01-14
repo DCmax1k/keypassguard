@@ -118,11 +118,11 @@ class Export extends Component {
                         return (
                             <div key={i} className='s' style={{ paddingBottom: 5, borderBottom: '1px solid black'}}>
                                 <div style={{display: 'flex', justifyContent: 'flex-start', alignItems: 'flex-start', width: '100%', height: 'fit-content', }}>
-                                    <div className='i' style={{width: '2%'}} >{i+1}</div>
+                                    <div className='i' style={{width: '3%'}} >{i+1}</div>
                                     <div className='t' style={{width: '20%', wordWrap: 'break-word', padding: '0 2px'}} >{site.name}</div>
                                     <div className='u' style={{width: '20%', wordWrap: 'break-word', padding: '0 2px'}}>{site.username}</div>
                                     <div className='p' style={{width: '20%', wordWrap: 'break-word', padding: '0 2px'}}>{site.password}</div>
-                                    <div className='n' style={{width: '38%', wordWrap: 'break-word', padding: '0 2px'}}>{site.note.length >= 1 ? site.note : ''}</div>
+                                    <div className='n' style={{width: '37%', wordWrap: 'break-word', padding: '0 2px'}}>{site.note.length >= 1 ? site.note : ''}</div>
                                 </div>
                                 
                             </div>
