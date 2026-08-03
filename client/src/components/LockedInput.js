@@ -102,9 +102,13 @@ class LockedInput extends Component {
                 }
             }
         return (
-            <div className={'LockedInput ' + this.props.className} style={{width: this.props.width}}>
+            <div className={'LockedInput ' + this.props.className + (this.props.type === 'textarea' ? ' textarea':' input')} style={{width: this.props.width}}>
                 <div className='placeholder' style={{color: this.props.value ? this.props.value.length > 0 ? "transparent" : "#B4D0DF" : "#B4D0DF"}}>{this.props.placeholder}</div>
-                <input type={this.state.showPassword ? "text" : this.props.type} onInput={this.onInput} value={value} style={{pointerEvents: this.props.locked ? "none" : "all", color: this.props.locked ? "#4984A4" : "white"}} />
+                {this.props.type === 'textarea' ? (
+                    <textarea onInput={this.onInput} rows={4} value={value} style={{pointerEvents: this.props.locked ? "none" : "all", color: this.props.locked ? "#4984A4" : "white"}} />
+                ) : (
+                    <input type={this.state.showPassword ? "text" : this.props.type} onInput={this.onInput} value={value} style={{pointerEvents: this.props.locked ? "none" : "all", color: this.props.locked ? "#4984A4" : "white"}} />
+                )}
                 <img onClick={this.showPassword} className='eye' style={{display: this.props.type === "password" ? "block" : "none"}} src='/images/icons/eye.svg' alt='eye'/>
                 <img className={'copy ' + this.state.copied} onClick={this.copyToClipboard} style={{display: this.props.copy ? "block" : "none"}} src='/images/icons/copy.svg' alt='copy to clipboard' />
                 <img className={`wand ${this.props.locked ? "hidden" : !this.props.wand ? "hidden" : "visible"}`} onClick={this.generatePassword} src='/images/icons/wand.svg' alt='generate random password' />

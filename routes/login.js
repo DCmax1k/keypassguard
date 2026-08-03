@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 
 const {sendWelcomeEmail} = require('./util/sendEmail');
 const User = require('../models/User');
+const accessTokenExpireTime = require('../server');
 
 function validateEmail(email) {
     const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -19,7 +20,7 @@ function validateUsername(username) {
 
 router.post('/createaccount', async (req, res) => {
     try {
-        const {  username, email, password} = req.body;
+        const {  username, email, password } = req.body;
         const checkUser = await User.findOne({ username });
         if (checkUser) {
             return res.json({status: 'error', message: 'Username already taken'});
@@ -41,10 +42,45 @@ router.post('/createaccount', async (req, res) => {
         });
         await user.save();
 
+        const dbId = JSON.parse(JSON.stringify(user._id));
+
         sendWelcomeEmail(email, username, `https://www.keypassguard.com/login/verifyemail/${user._id}/${verifyEmailCode}`);
 
-        const jwt_token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);
-        res.cookie('auth-token', jwt_token, { httpOnly: true, expires: new Date(Date.now() + 12 * 60 * 60 * 1000) }).json({ status: 'success' });
+        // User Info is the data that will be overwritten on local each request
+        const userInfo = {
+            // recentActivity,
+            _id: dbId,
+            pushTokens: user.pushTokens,
+            username: user.username,
+            email: user.email,
+            rank: user.rank,
+            plus: user.premium,
+            // friendRequests: user.friendRequests,
+            // friendsAdded: user.friendsAdded,
+            // friends: user.friends,
+            subscriptions: user.subscriptions,
+            // profileImg: user.profileImg,
+            // trouble: user.trouble,
+            googleId: user.googleId,
+            appleId: user.appleId,
+            facebookId: user.facebookId,
+            // usernameDecoration: user.usernameDecoration,
+            extraDetails: user.extraDetails,
+            // premiumSubscription: user.premiumSubscription,
+            sites: user.sites,
+        }
+
+        const jwt_token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {expiresIn: accessTokenExpireTime}); // Access token - for all pings
+        let refresh_token = null;
+        if (req.body.hardwareLogin)
+            refresh_token = jwt.sign({ userId: user._id }, process.env.REFRESH_TOKEN_SECRET, {expiresIn: "30d"}); // Refresh token - for face id auth
+        res.cookie('auth-token', jwt_token, { httpOnly: true, expires: new Date(Date.now() + 12 * 60 * 60 * 1000) });
+        res.json({
+            status: 'success', 
+            jsonWebToken: jwt_token,
+            userInfo,
+            refresh_token,
+        });
 
     } catch(err) {
         console.error(err);
@@ -73,12 +109,17 @@ router.post('/', async (req, res) => {
                 message: 'Incorrect password!',
             });
         }
-        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);
+        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {expiresIn: accessTokenExpireTime});
+        let refresh_token = null;
+        if (req.body.hardwareLogin)
+            refresh_token = jwt.sign({ userId: user._id }, process.env.REFRESH_TOKEN_SECRET, {expiresIn: "30d"}); // Refresh token - for face id auth
         res.cookie('auth-token', token, { httpOnly: true, expires: new Date(Date.now() + 12 * 60 * 60 * 1000)});
 
         return res.json({
             status: 'success',
             message: 'User logged in successfully!',
+            jsonWebToken: token,
+            refresh_token
         });
     } catch(err) {
         console.error(err);
@@ -143,7 +184,7 @@ router.post('/changepassword', authToken, async (req, res) => {
 });
 
 function authToken(req, res, next) {
-    const token = req.cookies['auth-token'];
+    const token = req.body?.jsonWebToken || req.cookies['auth-token'];
     if (!token) return res.sendStatus(401);
     jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
         if (err) return res.sendStatus(403);

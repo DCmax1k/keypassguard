@@ -196,8 +196,14 @@
     background-color: #053147;
     position: relative;
     border-radius: 10px;
-    height: 8vh;
+    
     width: 80%;
+}
+.EditSite .LockedInput.input {
+    height: 8vh;
+}
+.EditSite .LockedInput.textarea {
+    max-height: 20vh;
 }
 .EditSite .LockedInput > .eye {
     position: absolute;
@@ -251,6 +257,17 @@
     color: white;
     padding-left: 2vh;
 
+    transition: color 0.3s ease;
+}
+.EditSite .LockedInput > textarea {
+    background-color: transparent;
+    outline: none;
+    border: none;
+    height: 100%;
+    width: 100%;
+    font-size: 2.5vh;
+    color: white;
+    padding: 2vh;
     transition: color 0.3s ease;
 }
 
@@ -419,7 +436,7 @@
 @media screen and (max-width: 1000px) {
     .EditSite > .body > .leftArrow {
         left: 0vh;
-        top: -4vh;
+        top: 3vh;
     }
 }
 

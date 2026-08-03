@@ -49,6 +49,23 @@ const UserSchema = new mongoose.Schema({
         forgotPassword: {
             type: Object, // { tempCode, validUntil,  }
         }
+    },
+    pushtokens: [Object], // {token, deviceInfo, active}
+    subscriptions: [Object], // {}
+    extraDetails: {
+        type: Object, // {ip, deviceInfo, lastLogin}
+        default: {
+            preferences: {},
+        }
+    },
+    googleId: {
+        type: String,
+    },
+    facebookId: {
+        type: String,
+    },
+    appleId: {
+        type: String,
     }
 
 });

@@ -184,7 +184,7 @@ class EditSite extends Component {
                     </div>
                     <div className='row'>
                         <span>Note</span>
-                        <LockedInput className='note' value={this.state.note} onInput={this.changeNote} placeholder={''} type={'text'} customAlert={this.props.customAlert} copy={false} locked={this.state.inputsLocked} />
+                        <LockedInput className='note' value={this.state.note} onInput={this.changeNote} placeholder={''} type={'textarea'} customAlert={this.props.customAlert} copy={false} locked={this.state.inputsLocked} />
                     </div>
                     <div className='row'>
                         <div></div>

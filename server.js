@@ -20,6 +20,11 @@ const logger = (req, res, next) => {
     next();
 }
 
+// VERSION
+const VSN = 1; 
+const accessTokenExpireTime = '12h';
+module.exports = accessTokenExpireTime;
+
 // Middlewares
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -77,14 +82,78 @@ app.post('/auth', authToken, async (req, res) => {
         user.password = '';
         user.settings.verifyEmailCode = 0;
 
+        // Clear sites passwords
+        const clearedSites = user.sites.map(s => {
+            s.password = "";
+            return s;
+        })
+
+        // User Info is the data that will be overwritten on local each request
+        const userInfo = {
+            // recentActivity,
+            _id: req.userId,
+            pushTokens: user.pushTokens,
+            username: user.username,
+            email: user.email,
+            rank: user.rank,
+            plus: user.premium,
+            // friendRequests: user.friendRequests,
+            // friendsAdded: user.friendsAdded,
+            // friends: user.friends,
+            subscriptions: user.subscriptions,
+            // profileImg: user.profileImg,
+            // trouble: user.trouble,
+            googleId: user.googleId,
+            appleId: user.appleId,
+            facebookId: user.facebookId,
+            // usernameDecoration: user.usernameDecoration,
+            extraDetails: user.extraDetails,
+            // premiumSubscription: user.premiumSubscription,
+            sites: clearedSites,
+        }
+
         res.json({
             status: 'success',
-            user,
+            userInfo,
+            user: {...user.toObject(), _id: req.userId, sites: clearedSites},
+            vsn: VSN,
         });
     } catch(err) {
         console.error(err);
     }
     
+});
+
+
+const refreshLongToken = async (req, res, refreshToken) => {
+  if (!refreshToken) {
+    return res.status(401).json({ error: 'Refresh token is required' });
+  }
+  try {
+    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+    const userId = decoded.userId;
+    // const user = await db.findUserById(userId);
+    // if (!user) return res.status(403).json({ error: 'User no longer exists' });
+
+    const newAccessToken = jwt.sign(
+      { userId: userId }, 
+      process.env.JWT_SECRET, 
+      { expiresIn: accessTokenExpireTime }
+    );
+    return res.json({ status: "success", accessToken: newAccessToken });
+
+  } catch (error) {
+    if (error.name === 'TokenExpiredError') {
+      return res.status(403).json({ error: 'Session expired. Please log in again.' });
+    }
+    return res.status(403).json({ error: 'Invalid token' });
+  }
+};
+
+
+app.post('/auth/refresh', async (req, res) => {
+    const { refreshToken } = req.body;
+    await refreshLongToken(req, res, refreshToken);
 });
 
 // Sitemap
@@ -128,7 +197,9 @@ mongoose.connect(process.env.MONGODB_URI).then(() => {
 });
 
 function authToken(req, res, next) {
-    const token = req.cookies['auth-token'];
+    const token = req.body?.jsonWebToken || req.cookies['auth-token'];
+    console.log("Token received");
+    console.log(token);
     if (!token) return res.status(401).json({message: 'No authentication provided! Redirecting to login...'});
     jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
         if (err) return res.status(403).json({message: 'Error logging in. Incorrect information provided.'})

@@ -7,6 +7,7 @@ const cryptr = new Cryptr(process.env.CRYPTR_KEY);
 
 const User = require('../models/User');
 const {sendWelcomeEmail, sendVerifyNewEmail, sendEmail, send2fa, sendForgotPassword} = require('./util/sendEmail');
+const generateUniqueId = require('./util/generateUniqueId');
 
 router.post('/addsite', authToken, async (req, res) => {
     try {
@@ -20,7 +21,7 @@ router.post('/addsite', authToken, async (req, res) => {
         }
 
         const newSite = {
-            id: Math.random() + '' + Date.now(),
+            id: generateUniqueId(), //Math.random() + '' + Date.now(),
             name: '',
             username: '',
             password: '',
@@ -70,7 +71,7 @@ router.post('/editsite', authToken, async (req, res) => {
             sites[ind] = {
                 ...req.body.site,
                 password: encryptedPassword,
-                };
+            };
         } else {
             console.error('Couldnt find site!');
         }
@@ -86,6 +87,72 @@ router.post('/editsite', authToken, async (req, res) => {
     }
 });
 
+// SAVE SITE - Made for mobile app to be a more reliable way to save sites
+// If no id provided, new site is created. If id, existing site is saved
+router.post('/savesite', authToken, async (req, res) => {
+    try {
+        const user = await User.findById(req.userId);
+        if (!user) {
+            return res.json({status: "error", message: "No user!"});
+        }
+        const sites = user.sites;
+
+        const {site} = req.body;
+        if (!site.id) {
+            // New site creation here
+            if (!user.settings.emailVerified && user.sites.length >= 3) {
+                return res.json({
+                    status: 'error',
+                    message: 'Please verify your email before adding more than 3 sites!',
+                });
+            }
+            const encryptedPassword = cryptr.encrypt(site.password);
+            const newSite = {
+                id: generateUniqueId(), //Math.random() + '' + Date.now(),
+                name: site.name,
+                username: site.username,
+                password: encryptedPassword,
+                note: site.note,
+            }
+            user.sites.push(newSite);
+            user.markModified("sites");
+            await user.save();
+            return res.json({
+                status: 'success',
+                site: {...newSite, password: ""},
+            });
+
+        } else {
+            // Save existing site
+            const ind = sites.findIndex((s) => {return s.id === site.id});
+            if (ind > -1) {
+                const encryptedPassword = cryptr.encrypt(site.password);
+            
+                sites[ind] = {
+                    id: site.id,
+                    name: site.name,
+                    username: site.username,
+                    password: encryptedPassword,
+                    note: site.note,
+                };
+                user.sites = sites;
+                user.markModified("sites");
+                await user.save();
+                return res.json({
+                    status: 'success',
+                    site: sites[ind],
+                });
+            } else {
+                return res.json({status: "error", message: "No site with provided id!"})
+            }
+        }
+        return res.json({status: "error", message: "An unknown error occured. Please try again later."})
+
+    } catch(err) {
+        console.error(err);
+    }
+});
+
 router.post('/requestdecrypt', authToken, async (req, res) => {
     try {
         const user = await User.findById(req.userId);
@@ -95,13 +162,13 @@ router.post('/requestdecrypt', authToken, async (req, res) => {
 
         let data;
 
-        if (site.password.length === 0) {
-            data = "";
-        } else {
+        // if (site.password.length === 0) {
+        //     data = "";
+        // } else {
             const decrypted = cryptr.decrypt(sites[ind].password);
 
             data = btoa(decrypted);
-        }
+        // }
 
         res.json({
             status: 'success',
@@ -365,7 +432,7 @@ router.post('/requestchangepassword', async (req, res) => {
 });
 
 function authToken(req, res, next) {
-    const token = req.cookies['auth-token'];
+    const token = req.body?.jsonWebToken || req.cookies['auth-token'];
     if (!token) return res.sendStatus(401);
     jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
         if (err) return res.sendStatus(403);
