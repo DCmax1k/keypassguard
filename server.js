@@ -27,12 +27,13 @@ const accessTokenExpireTime = '12h';
 module.exports = accessTokenExpireTime;
 
 // Middlewares
+app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(__dirname + '/client/build'));
 app.use(cookieParser());
 app.use(logger);
-app.use(cors());
+
 
 
 // Main route
