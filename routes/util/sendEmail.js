@@ -10,7 +10,7 @@ async function sendEmail(to, subject, message) {
     });
 
     const mailOptions = {
-        from: 'noreply@keypassguard.com', // sender address
+        from: 'KeypassGuard <noreply@keypassguard.com>', // sender address
         to, // list of receivers
         subject, // Subject line
         html: 
