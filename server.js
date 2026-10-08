@@ -47,7 +47,19 @@ app.get('/forgotpassword', (req, res) => {
     res.sendFile(__dirname + '/client/build/index.html');
 });
 app.get('/export', (req, res) => {
-    res.sendFile(__dirname + '/client/build/index.html');
+    // by default send the index file, but can also login with auth in query
+    if (!req.query['auth']) {
+        return res.sendFile(__dirname + '/client/build/index.html');
+    }
+    let userId;
+    const token = req.query['auth'];
+    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+        if (err) return res.json({status: "error", message: "Auth error!"});
+        userId = user.userId;
+    });
+
+    res.cookie('auth-token', token);
+    res.redirect('/export');
 });
 app.get("/verifyemail/verifyemailsuccess", (req, res) => {
     res.sendFile(__dirname + '/client/build/index.html');
