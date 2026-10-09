@@ -184,7 +184,8 @@ router.post('/requestdecrypt', authToken, async (req, res) => {
     }
 });
 router.post('/checkpass', authToken, async (req, res) => {
-    const { auth } = req.body;
+    let { auth } = req.body;
+    auth = auth.trim();
     const user = await User.findOne({_id: req.userId});
 
     if (!user || !auth) {
