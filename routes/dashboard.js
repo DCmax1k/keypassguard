@@ -280,7 +280,8 @@ router.post('/changeusername', authToken, async (req, res) => {
 router.post('/changeemail', authToken, async (req, res) => {
     try {
         const user = await User.findById(req.userId);
-        const { newValue } = req.body;
+        let { newValue } = req.body;
+        newValue = newValue.trim();
 
         const { email, username } = user;
         const verifyEmailCode = Math.floor(Math.random() * 900000) + 100000;
@@ -289,6 +290,7 @@ router.post('/changeemail', authToken, async (req, res) => {
         user.settings.emailVerified = false;
         user.settings.verifyEmailCode = verifyEmailCode;
         user.settings.emailChanged = Date.now();
+        user.settings.resentEmailLast = Date.now();
         await user.save();
 
         sendVerifyNewEmail(newValue, username, `https://www.keypassguard.com/login/verifyemail/${user._id}/${verifyEmailCode}`);
