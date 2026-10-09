@@ -20,7 +20,10 @@ function validateUsername(username) {
 
 router.post('/createaccount', async (req, res) => {
     try {
-        const {  username, email, password } = req.body;
+        let {  username, email, password } = req.body;
+        username = username.trim();
+        email = email.trim();
+        password = password.trim();
         const checkUser = await User.findOne({ username });
         if (checkUser) {
             return res.json({status: 'error', message: 'Username already taken'});

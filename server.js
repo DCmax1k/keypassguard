@@ -58,8 +58,7 @@ app.get('/export', (req, res) => {
         userId = user.userId;
     });
 
-    res.cookie('auth-token', token);
-    res.redirect('/export');
+    res.cookie('auth-token', token).redirect("/export");
 });
 app.get("/verifyemail/verifyemailsuccess", (req, res) => {
     res.sendFile(__dirname + '/client/build/index.html');
@@ -125,6 +124,8 @@ app.post('/auth', authToken, async (req, res) => {
             extraDetails: user.extraDetails,
             // premiumSubscription: user.premiumSubscription,
             sites: clearedSites,
+            // Added things below
+            settings: user.settings,
         }
 
         res.json({

@@ -258,7 +258,12 @@ router.post('/2fa', authToken, async (req, res) => {
 router.post('/changeusername', authToken, async (req, res) => {
     try {
         const user = await User.findById(req.userId);
-        const { newValue } = req.body;
+        let { newValue } = req.body;
+        newValue = newValue.trim();
+        const checkUser = await User.findOne({ username: newValue });
+        if (checkUser) {
+            return res.json({status: 'error', message: 'Username already taken'});
+        }
 
         user.username = newValue;
         await user.save();
