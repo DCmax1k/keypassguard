@@ -372,8 +372,8 @@ router.post('/requesttemperarycode', async (req, res) => {
     // await user.save();
     await User.findByIdAndUpdate(user._id, {
         $set: {
-            'settings.forgotPassword.token': hashedToken,
-            'settings.forgotPassword.expiresAt': expirationDate
+            'settings.forgotPassword.tempCode': code,
+            'settings.forgotPassword.validUntil': validUntil
         }
     }, { new: true, runValidators: true });
 
