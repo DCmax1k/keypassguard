@@ -364,12 +364,18 @@ router.post('/requesttemperarycode', async (req, res) => {
     const currentTime = Date.now();
     const validUntil = currentTime + 1000*60*10;
 
-    // Save user info
-    user.settings.forgotPassword = {};
-    await user.save();
-    user.settings.forgotPassword.tempCode = code;
-    user.settings.forgotPassword.validUntil = validUntil;
-    await user.save();
+    // // Save user info
+    // user.settings.forgotPassword = {};
+    // await user.save();
+    // user.settings.forgotPassword.tempCode = code;
+    // user.settings.forgotPassword.validUntil = validUntil;
+    // await user.save();
+    await User.findByIdAndUpdate(user._id, {
+        $set: {
+            'settings.forgotPassword.token': hashedToken,
+            'settings.forgotPassword.expiresAt': expirationDate
+        }
+    }, { new: true, runValidators: true });
 
     // Send email
     sendForgotPassword(email, user.username, code);

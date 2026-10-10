@@ -33,7 +33,7 @@ const UserSchema = new mongoose.Schema({
     settings: {
         verifyEmailCode: {
             type: Number,
-
+            default: null,
         },
         emailVerified: {
             type: Boolean,
@@ -47,7 +47,8 @@ const UserSchema = new mongoose.Schema({
             type: Date,
         },
         forgotPassword: {
-            type: Object, // { tempCode, validUntil,  }
+            type: Object, 
+            default: { tempCode: null, validUntil: null,  }
         }
     },
     pushtokens: [Object], // {token, deviceInfo, active}
