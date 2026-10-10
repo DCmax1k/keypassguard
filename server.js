@@ -43,6 +43,9 @@ app.get('/', (req, res) => {
 app.get('/dashboard', (req, res) => {
     res.sendFile(__dirname + '/client/build/index.html');
 });
+app.get('/privacypolicy', (req, res) => {
+    res.sendFile(__dirname + '/client/build/privacypolicy.html');
+});
 app.get('/forgotpassword', (req, res) => {
     res.sendFile(__dirname + '/client/build/index.html');
 });

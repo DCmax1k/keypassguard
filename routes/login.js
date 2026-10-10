@@ -2,6 +2,20 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const jwksClient = require('jwks-rsa');
+
+const { OAuth2Client } = require("google-auth-library");
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const appleClient = jwksClient({
+    jwksUri: 'https://appleid.apple.com/auth/keys'
+});
+function getAppleSigningKey(header, callback) {
+    appleClient.getSigningKey(header.kid, (err, key) => {
+        if (err) return callback(err);
+        const signingKey = key.publicKey || key.rsaPublicKey;
+        callback(null, signingKey);
+    });
+}
 
 const {sendWelcomeEmail} = require('./util/sendEmail');
 const User = require('../models/User');
@@ -18,12 +32,78 @@ function validateUsername(username) {
     return username.length >= 1;
 }
 
+
+const createAccount = async ({partyType, thirdPartyId, username, email, password}) => {
+    username = username.trim();
+    email = email.trim();
+    password = password.trim();
+    const preUser={};
+    let hashedPassword = "";
+    if (!partyType) {
+        // ORDER: Check username and email, validate username and email, hash password, set preuser
+        const existingUser = await User.findOne({
+            $or: [{ username }, { email }]
+        });
+        if (existingUser) {
+            if (existingUser.username === username) {
+                return { status: 'error', message: 'Username already taken' };
+            }
+            if (existingUser.email === email) {
+                return { status: 'error', message: 'Email already taken' };
+            }
+        }
+        if (!validateUsername(username)) return {status: 'error', message: vUsername};
+        if (!validateEmail(email)) return {status: 'error', message: 'Please enter a valid email'};
+        if (!validatePass(password)) return {status: 'error', message: 'Password must be at least 8 characters long'};
+        hashedPassword = await bcrypt.hash(password, 10);
+    } else if (partyType === 'google') {
+        // ORDER:Check if google id exists [already verified], set preuser
+        if (!email) return {status: "error", message: "error fetching email" }; 
+        const checkId = await User.findOne({googleId: thirdPartyId});
+        if (checkId) return { status: 'error', message: 'err: tried creating an account with google id that exists already' };
+        preUser.googleId = thirdPartyId;
+    } else if (partyType === 'apple') {
+        // ORDER: Check if apple id exists [already verified], set preuser
+        if (!email) return {status: "error", message: "error fetching email" }; 
+        const checkId = await User.findOne({appleId: thirdPartyId});
+        if (checkId) return { status: 'error', message: 'err: tried creating an account with apple id that exists already' };
+        preUser.appleId = thirdPartyId;
+    } else {
+        return {status: "error", message: "error fetching partytype" }; 
+    }
+
+    // Create user
+    const verifyEmailCode = `${Math.floor(Math.random() * 900000) + 100000}`;
+    const user = new User({
+        email,
+        username: username ?? "",
+        password: hashedPassword,
+        settings: {
+            verifyEmailCode,
+        },
+        ...preUser,
+    });
+    await user.save();
+
+    
+    const modifiedUser = JSON.parse(JSON.stringify(user));
+    modifiedUser.password = "";
+    // return user
+    return modifiedUser;
+
+}
+
+
 router.post('/createaccount', async (req, res) => {
     try {
-        let {  username, email, password } = req.body;
+        let { partyType, username, email, password } = req.body;
         username = username.trim();
         email = email.trim();
         password = password.trim();
+        const user = await createAccount({ username, email, password});
+        if (user.status === 'error') return res.json({status: 'error', message: user.message});
+
+        /* // The following was moved to the create user function
         const checkUser = await User.findOne({ username });
         if (checkUser) {
             return res.json({status: 'error', message: 'Username already taken'});
@@ -44,7 +124,7 @@ router.post('/createaccount', async (req, res) => {
             }
         });
         await user.save();
-
+        */
         const dbId = JSON.parse(JSON.stringify(user._id));
 
         sendWelcomeEmail(email, username, `https://www.keypassguard.com/login/verifyemail/${user._id}/${verifyEmailCode}`);
@@ -89,6 +169,94 @@ router.post('/createaccount', async (req, res) => {
         console.error(err);
     }
 });
+
+router.post("/createusername", authToken, async (req, res) => {
+    try {
+        const {username} = req.body;
+        const existingUser = await User.findOne({username});
+        if (existingUser) return req.json({ status: 'error', message: 'Username already taken' });
+        const vUsername = validateUsername(username);
+        if (vUsername !== 'success') return res.json({status: 'error', message: vUsername});
+
+        const user = await User.findById(req.userId);
+        user.username = username;
+        await user.save();
+        
+        if (!user) return res.json({status: "error", message: "User not found"});
+        const userInfo = getUserInfo(user);
+        return res.json({status: "success", userInfo});
+
+    } catch(err) {
+        console.error(err);
+    }
+});
+
+// handles only when click thrid party button
+router.post("/newloginthirdparty", async (req, res) => {
+    const { partyType, idToken, email, } = req.body;
+
+    // Verify idToken, check if user exists, if doesnt create account,
+    // if user, return with user and session token,
+    // else just push session token to create username
+
+    let user = null;
+    if (!partyType) {
+        console.log("Err: Party type not google or apple");
+    } else if (partyType === "google") {
+        // Verify google session idToken
+        const ticket = await googleClient.verifyIdToken({
+            idToken,
+            audience: process.env.GOOGLE_CLIENT_ID,
+        });
+        const { sub } = ticket.getPayload();
+        user = await User.findOne({googleId: sub});
+        if (!user) {
+            user = await createAccount({partyType, thirdPartyId: sub, email });
+            if (user.status === 'error') return res.json({status: "error", message: user.message});
+        }
+    } else if (partyType === "apple") {
+        try {
+            const decodedToken = await new Promise((resolve, reject) => {
+                jwt.verify(
+                    idToken,
+                    getAppleSigningKey,
+                    {
+                        algorithms: ['RS256'],
+                        issuer: 'https://appleid.apple.com',
+                        audience: 'com.caldwell.keypassguard' 
+                    },
+                    (err, decoded) => {
+                        if (err) return reject(err);
+                        resolve(decoded);
+                    }
+                );
+            });
+
+            // The 'sub' is the permanent unique Apple User ID
+            const sub = decodedToken.sub;
+            user = await User.findOne({appleId: sub});
+            if (!user) {
+                user = await createAccount({partyType, thirdPartyId: sub, email });
+                if (user.status === 'error') return res.json({status: "error", message: user.message});
+            }
+            
+        } catch (error) {
+            console.error("Apple Token Verification Error:", error);
+            return res.json({ status: 'error', message: "Invalid Apple Token" });
+        }
+    } else {
+        console.log("Err: Party type not google or apple");
+    }
+
+    // Session token
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);
+
+    return res.json({
+            status: 'success',
+            message: 'User logged in successfully!',
+            jsonWebToken: token,
+        });
+})
 
 router.post('/', async (req, res) => {
     try {
