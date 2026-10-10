@@ -2,19 +2,23 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const jwksClient = require('jwks-rsa');
+const jwkToPem = require('jwk-to-pem');
 
 const { OAuth2Client } = require("google-auth-library");
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const appleClient = jwksClient({
     jwksUri: 'https://appleid.apple.com/auth/keys'
 });
-function getAppleSigningKey(header, callback) {
-    appleClient.getSigningKey(header.kid, (err, key) => {
-        if (err) return callback(err);
-        const signingKey = key.publicKey || key.rsaPublicKey;
-        callback(null, signingKey);
-    });
+async function getAppleSigningKey(kid) {
+    const response = await fetch('https://appleid.apple.com/auth/keys');
+    const data = await response.json();
+    const appleKey = data.keys.find(k => k.kid === kid);
+    
+    if (!appleKey) {
+        throw new Error('Apple public key not found');
+    }
+
+    return jwkToPem(appleKey);
 }
 
 const {sendWelcomeEmail} = require('./util/sendEmail');
