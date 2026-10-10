@@ -128,6 +128,7 @@ router.post('/createaccount', async (req, res) => {
         */
         const dbId = JSON.parse(JSON.stringify(user._id));
 
+        const verifyEmailCode = user.settings.verifyEmailCode;
         sendWelcomeEmail(email, username, `https://www.keypassguard.com/login/verifyemail/${user._id}/${verifyEmailCode}`);
 
         // User Info is the data that will be overwritten on local each request
