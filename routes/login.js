@@ -6,9 +6,6 @@ const jwkToPem = require('jwk-to-pem');
 
 const { OAuth2Client } = require("google-auth-library");
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-const appleClient = jwksClient({
-    jwksUri: 'https://appleid.apple.com/auth/keys'
-});
 async function getAppleSigningKey(kid) {
     const response = await fetch('https://appleid.apple.com/auth/keys');
     const data = await response.json();
