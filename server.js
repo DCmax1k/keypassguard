@@ -40,6 +40,9 @@ app.use(logger);
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/client/build/index.html');
 });
+app.post("/checkping", (req, res) => {
+    return res.json({status: "success"});
+});
 app.get('/dashboard', (req, res) => {
     res.sendFile(__dirname + '/client/build/index.html');
 });
