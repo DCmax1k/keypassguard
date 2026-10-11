@@ -185,7 +185,30 @@ router.post("/createusername", authToken, async (req, res) => {
         await user.save();
         
         if (!user) return res.json({status: "error", message: "User not found"});
-        const userInfo = getUserInfo(user);
+        const userInfo = {
+            // recentActivity,
+            _id: req.userId,
+            //pushTokens: user.pushTokens,
+            username: user.username,
+            email: user.email,
+            rank: user.rank,
+            plus: user.premium,
+            // friendRequests: user.friendRequests,
+            // friendsAdded: user.friendsAdded,
+            // friends: user.friends,
+            subscriptions: user.subscriptions,
+            // profileImg: user.profileImg,
+            // trouble: user.trouble,
+            googleId: user.googleId,
+            appleId: user.appleId,
+            facebookId: user.facebookId,
+            // usernameDecoration: user.usernameDecoration,
+            extraDetails: user.extraDetails,
+            // premiumSubscription: user.premiumSubscription,
+            sites: clearedSites,
+            // Added things below
+            settings: user.settings,
+        }
         return res.json({status: "success", userInfo});
 
     } catch(err) {

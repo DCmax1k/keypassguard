@@ -112,7 +112,7 @@ app.post('/auth', authToken, async (req, res) => {
         const userInfo = {
             // recentActivity,
             _id: req.userId,
-            pushTokens: user.pushTokens,
+            //pushTokens: user.pushTokens,
             username: user.username,
             email: user.email,
             rank: user.rank,
