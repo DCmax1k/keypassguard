@@ -176,7 +176,7 @@ router.post("/createusername", authToken, async (req, res) => {
     try {
         const {username} = req.body;
         const existingUser = await User.findOne({username});
-        if (existingUser) return req.json({ status: 'error', message: 'Username already taken' });
+        if (existingUser) return res.json({ status: 'error', message: 'Username already taken' });
         const vUsername = validateUsername(username);
         if (!vUsername) return res.json({status: 'error', message: "Username must be at least 1 character long."});
 
