@@ -108,7 +108,6 @@ app.post('/auth', authToken, async (req, res) => {
         res.json({
             status: 'success',
             userInfo,
-            user: {...user.toObject(), _id: req.userId, sites: clearedSites},
             vsn: VSN,
         });
     } catch(err) {
