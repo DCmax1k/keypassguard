@@ -87,6 +87,7 @@ const loginRoute = require('./routes/login');
 app.use('/login', loginRoute);
 
 const dashboardRoute = require('./routes/dashboard');
+const getUserInfo = require('./routes/util/getUserInfo');
 app.use('/dashboard', dashboardRoute);
 
 
