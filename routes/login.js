@@ -21,6 +21,7 @@ async function getAppleSigningKey(kid) {
 const {sendWelcomeEmail} = require('./util/sendEmail');
 const User = require('../models/User');
 const accessTokenExpireTime = require('../server');
+const getUserInfo = require('./util/getUserInfo');
 
 function validateEmail(email) {
     const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -131,29 +132,7 @@ router.post('/createaccount', async (req, res) => {
         const verifyEmailCode = user.settings.verifyEmailCode;
         sendWelcomeEmail(email, username, `https://www.keypassguard.com/login/verifyemail/${user._id}/${verifyEmailCode}`);
 
-        // User Info is the data that will be overwritten on local each request
-        const userInfo = {
-            // recentActivity,
-            _id: dbId,
-            pushTokens: user.pushTokens,
-            username: user.username,
-            email: user.email,
-            rank: user.rank,
-            plus: user.premium,
-            // friendRequests: user.friendRequests,
-            // friendsAdded: user.friendsAdded,
-            // friends: user.friends,
-            subscriptions: user.subscriptions,
-            // profileImg: user.profileImg,
-            // trouble: user.trouble,
-            googleId: user.googleId,
-            appleId: user.appleId,
-            facebookId: user.facebookId,
-            // usernameDecoration: user.usernameDecoration,
-            extraDetails: user.extraDetails,
-            // premiumSubscription: user.premiumSubscription,
-            sites: user.sites,
-        }
+        const userInfo = getUserInfo(user);
 
         const jwt_token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {expiresIn: accessTokenExpireTime}); // Access token - for all pings
         let refresh_token = null;
@@ -185,30 +164,7 @@ router.post("/createusername", authToken, async (req, res) => {
         await user.save();
         
         if (!user) return res.json({status: "error", message: "User not found"});
-        const userInfo = {
-            // recentActivity,
-            _id: req.userId,
-            //pushTokens: user.pushTokens,
-            username: user.username,
-            email: user.email,
-            rank: user.rank,
-            plus: user.premium,
-            // friendRequests: user.friendRequests,
-            // friendsAdded: user.friendsAdded,
-            // friends: user.friends,
-            subscriptions: user.subscriptions,
-            // profileImg: user.profileImg,
-            // trouble: user.trouble,
-            googleId: user.googleId,
-            appleId: user.appleId,
-            facebookId: user.facebookId,
-            // usernameDecoration: user.usernameDecoration,
-            extraDetails: user.extraDetails,
-            // premiumSubscription: user.premiumSubscription,
-            sites: clearedSites,
-            // Added things below
-            settings: user.settings,
-        }
+        const userInfo = getUserInfo(user);
         return res.json({status: "success", userInfo});
 
     } catch(err) {

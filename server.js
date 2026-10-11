@@ -102,37 +102,7 @@ app.post('/auth', authToken, async (req, res) => {
         user.password = '';
         user.settings.verifyEmailCode = 0;
 
-        // Clear sites passwords
-        const clearedSites = user.sites.map(s => {
-            s.password = "";
-            return s;
-        })
-
-        // User Info is the data that will be overwritten on local each request
-        const userInfo = {
-            // recentActivity,
-            _id: req.userId,
-            //pushTokens: user.pushTokens,
-            username: user.username,
-            email: user.email,
-            rank: user.rank,
-            plus: user.premium,
-            // friendRequests: user.friendRequests,
-            // friendsAdded: user.friendsAdded,
-            // friends: user.friends,
-            subscriptions: user.subscriptions,
-            // profileImg: user.profileImg,
-            // trouble: user.trouble,
-            googleId: user.googleId,
-            appleId: user.appleId,
-            facebookId: user.facebookId,
-            // usernameDecoration: user.usernameDecoration,
-            extraDetails: user.extraDetails,
-            // premiumSubscription: user.premiumSubscription,
-            sites: clearedSites,
-            // Added things below
-            settings: user.settings,
-        }
+        const userInfo = getUserInfo(user);
 
         res.json({
             status: 'success',
