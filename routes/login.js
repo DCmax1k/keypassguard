@@ -69,7 +69,7 @@ const createAccount = async ({partyType, thirdPartyId, username, email, password
         preUser.googleId = thirdPartyId;
     } else if (partyType === 'apple') {
         // ORDER: Check if apple id exists [already verified], set preuser
-        if (!email) return {status: "error", message: "error fetching email" }; 
+        if (!email) return {status: "error", message: "Error fetching email" }; 
         const checkId = await User.findOne({appleId: thirdPartyId});
         if (checkId) return { status: 'error', message: 'err: tried creating an account with apple id that exists already' };
         preUser.appleId = thirdPartyId;
