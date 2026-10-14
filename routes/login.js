@@ -36,9 +36,12 @@ function validateUsername(username) {
 
 
 const createAccount = async ({partyType, thirdPartyId, username, email, password}) => {
-    username = username.trim();
-    email = email.trim();
-    password = password.trim();
+    if (!partyType) {
+        username = username.trim();
+        email = email.trim();
+        password = password.trim();
+    }
+    
     const preUser={};
     let hashedPassword = "";
     if (!partyType) {
