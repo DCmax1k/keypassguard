@@ -31,7 +31,7 @@ function validatePass(pass) {
     return pass.length >= 8;
 }
 function validateUsername(username) {
-    return username.length >= 1;
+    return username.length >= 1 && !username.includes("@");
 }
 
 
@@ -127,7 +127,7 @@ router.post('/createaccount', async (req, res) => {
         });
         await user.save();
         */
-        const dbId = JSON.parse(JSON.stringify(user._id));
+        //const dbId = JSON.parse(JSON.stringify(user._id));
 
         const verifyEmailCode = user.settings.verifyEmailCode;
         sendWelcomeEmail(email, username, `https://www.keypassguard.com/login/verifyemail/${user._id}/${verifyEmailCode}`);
@@ -173,7 +173,7 @@ router.post("/createusername", authToken, async (req, res) => {
 });
 
 // handles only when click thrid party button
-router.post("/newloginthirdparty", async (req, res) => {
+router.post("/loginthirdparty", async (req, res) => {
     const { partyType, idToken, email, } = req.body;
 
     // Verify idToken, check if user exists, if doesnt create account,
