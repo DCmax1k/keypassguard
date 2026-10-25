@@ -201,8 +201,8 @@ router.post("/loginthirdparty", async (req, res) => {
     } else if (partyType === "apple") {
         try {
             const decodedToken = await new Promise((resolve, reject) => {
-                const unverifiedPayload = jwt.decode(idToken, { complete: true });
-                console.log("Full Decoded Apple Token:", unverifiedPayload);
+                //const unverifiedPayload = jwt.decode(idToken, { complete: true });
+                //console.log("Full Decoded Apple Token:", unverifiedPayload);
                 jwt.verify(
                     idToken,
                     getAppleSigningKey,
@@ -210,6 +210,7 @@ router.post("/loginthirdparty", async (req, res) => {
                         algorithms: ['RS256'],
                         issuer: 'https://appleid.apple.com',
                         audience: 'com.caldwell.keypassguard' 
+                        //audience: 'host.exp.Exponent' // testing sign in with apple on expo go
                     },
                     (err, decoded) => {
                         if (err) return reject(err);
