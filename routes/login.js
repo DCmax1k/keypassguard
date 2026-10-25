@@ -235,10 +235,15 @@ router.post("/loginthirdparty", async (req, res) => {
     // Session token
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);
 
+    let refresh_token = null;
+    if (req.body.hardwareLogin)
+        refresh_token = jwt.sign({ userId: user._id }, process.env.REFRESH_TOKEN_SECRET, {expiresIn: "30d"}); // Refresh token - for face id auth
+
     return res.json({
             status: 'success',
             message: 'User logged in successfully!',
             jsonWebToken: token,
+            refresh_token,
         });
 })
 

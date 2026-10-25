@@ -6,6 +6,7 @@ const Cryptr = require('cryptr');
 const cryptr = new Cryptr(process.env.CRYPTR_KEY);
 
 const User = require('../models/User');
+const DeletedUser = require('../models/DeletedUser');
 const {sendWelcomeEmail, sendVerifyNewEmail, sendEmail, send2fa, sendForgotPassword} = require('./util/sendEmail');
 const generateUniqueId = require('./util/generateUniqueId');
 
@@ -445,10 +446,19 @@ router.post('/requestchangepassword', async (req, res) => {
     });
 });
 
+// Dont actually delete account so that it is recoverable for 30 days
 router.post('/deleteaccount', authToken, async (req, res) => {
     try {
         const user = await User.findById(req.userId);
         if (!user) return res.json({status: "error", message: "User not found"});
+        // Transfer to DeletedUser collection first
+        const deletedUserData = {
+            ...user.toObject(),
+            deletedOn: new Date() // Sets the current timestamp
+        };
+        const deletedUser = new DeletedUser(deletedUserData);
+        await deletedUser.save();
+        // If successfully transfered, delete from User
         await User.deleteOne({_id: req.userId});
         res.json({status: "success", message: "Account deleted"});
     } catch(err) {
@@ -456,6 +466,17 @@ router.post('/deleteaccount', authToken, async (req, res) => {
         res.json({status: "error", message: "Failed to delete account"});
     }
 });
+// router.post('/deleteaccount', authToken, async (req, res) => {
+//     try {
+//         const user = await User.findById(req.userId);
+//         if (!user) return res.json({status: "error", message: "User not found"});
+//         await User.deleteOne({_id: req.userId});
+//         res.json({status: "success", message: "Account deleted"});
+//     } catch(err) {
+//         console.error(err);
+//         res.json({status: "error", message: "Failed to delete account"});
+//     }
+// });
 
 function authToken(req, res, next) {
     const token = req.body?.jsonWebToken || req.cookies['auth-token'];

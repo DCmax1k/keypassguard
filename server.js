@@ -119,7 +119,7 @@ app.post('/auth', authToken, async (req, res) => {
 });
 
 
-const refreshLongToken = async (req, res, refreshToken) => {
+const refreshAccessToken = async (req, res, refreshToken) => {
   if (!refreshToken) {
     return res.status(401).json({ error: 'Refresh token is required' });
   }
@@ -147,7 +147,7 @@ const refreshLongToken = async (req, res, refreshToken) => {
 
 app.post('/auth/refresh', async (req, res) => {
     const { refreshToken } = req.body;
-    await refreshLongToken(req, res, refreshToken);
+    await refreshAccessToken(req, res, refreshToken);
 });
 
 // Sitemap
