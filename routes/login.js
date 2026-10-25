@@ -57,7 +57,7 @@ const createAccount = async ({partyType, thirdPartyId, username, email, password
                 return { status: 'error', message: 'Email already taken' };
             }
         }
-        if (!validateUsername(username)) return {status: 'error', message: vUsername};
+        if (!validateUsername(username)) return {status: 'error', message: "Username must be at least 1 character long."};
         if (!validateEmail(email)) return {status: 'error', message: 'Please enter a valid email'};
         if (!validatePass(password)) return {status: 'error', message: 'Password must be at least 8 characters long'};
         hashedPassword = await bcrypt.hash(password, 10);
@@ -201,6 +201,8 @@ router.post("/loginthirdparty", async (req, res) => {
     } else if (partyType === "apple") {
         try {
             const decodedToken = await new Promise((resolve, reject) => {
+                const unverifiedPayload = jwt.decode(idToken, { complete: true });
+                console.log("Full Decoded Apple Token:", unverifiedPayload);
                 jwt.verify(
                     idToken,
                     getAppleSigningKey,
