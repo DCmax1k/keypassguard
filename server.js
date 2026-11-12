@@ -46,6 +46,19 @@ app.post("/checkping", (req, res) => {
 app.get('/dashboard', (req, res) => {
     res.sendFile(__dirname + '/client/build/index.html');
 });
+app.get('/admin', async (req, res) => {
+    const token = req.cookies['auth-token'];
+    if (!token) return res.redirect('/dashboard');
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await User.findById(decoded.userId, 'rank');
+        if (!user || user.rank !== 'admin') return res.redirect('/dashboard');
+        return res.sendFile(__dirname + '/client/build/index.html');
+    } catch (err) {
+        return res.redirect('/dashboard');
+    }
+});
 app.get('/privacypolicy', (req, res) => {
     res.sendFile(__dirname + '/client/build/privacypolicy.html');
 });
@@ -88,6 +101,9 @@ app.use('/login', loginRoute);
 
 const dashboardRoute = require('./routes/dashboard');
 app.use('/dashboard', dashboardRoute);
+
+const adminRoute = require('./routes/admin');
+app.use('/admin', adminRoute);
 
 const getUserInfo = require('./routes/util/getUserInfo');
 

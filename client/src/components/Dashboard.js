@@ -294,7 +294,12 @@ class Dashboard extends Component {
                     </div>
                     
                 </div>
-                <img onClick={this.toggleSideBar} className='profileBtn' src="/images/profile.svg" alt='profile settings' />
+                <div className='dashboardActions'>
+                    {this.state.user.rank === 'admin' && (
+                        <a className='adminBtn' href='/admin'>Admin</a>
+                    )}
+                    <img onClick={this.toggleSideBar} className='profileBtn' src="/images/profile.svg" alt='profile settings' />
+                </div>
                 <SideBar logout={this.logout} user={this.state.user} editUser={this.editUser} toggle={this.toggleSideBar} sideBar={this.state.sideBar} customAlert={this.customAlert} />
 
                 {/* Edit site */}

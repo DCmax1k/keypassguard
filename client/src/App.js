@@ -8,6 +8,7 @@ import "./index.css";
 
 import Index from './components/Index';
 import Dashboard from './components/Dashboard';
+import Admin from './components/Admin';
 import Loading from './components/Loading';
 import Export from './components/Export'
 import ForgotPassword from './components/ForgotPassword';
@@ -22,6 +23,7 @@ function App() {
           <Route path="/" element={<Index />} />
           <Route path="/forgotpassword" element={<ForgotPassword />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/admin" element={<Admin />} />
           <Route path="/export" element={<Export />} />
           <Route path="/verifyemail/verifyemailsuccess" element={<Loading loadingText={'Email successfully verified. Redirecting...'} redirect={'/'} />} />
           <Route path="/verifyemail/verifyemailerror" element={<Loading loadingText={'Error verifying email. Please try again later.'} />} />

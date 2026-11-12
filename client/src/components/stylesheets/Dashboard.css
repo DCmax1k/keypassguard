@@ -101,13 +101,28 @@
     opacity: 1;
 }
 
-.Dashboard > .profileBtn {
+.Dashboard > .dashboardActions {
     position: absolute;
-    height: 5vh;
-    width: 10vh;
     top: 5vh;
     right: 2vh;
+    display: flex;
+    align-items: center;
+    gap: 1vh;
+    z-index: 1;
+}
+.Dashboard > .dashboardActions > .profileBtn {
+    height: 5vh;
+    width: 10vh;
     cursor: pointer;
+}
+.Dashboard > .dashboardActions > .adminBtn {
+    padding: 1vh 1.5vh;
+    border: 1px solid #75B2D6;
+    border-radius: 1000px;
+    color: white;
+    font-size: 1.7vh;
+    text-decoration: none;
+    white-space: nowrap;
 }
 
 .EditSite * {
@@ -468,7 +483,7 @@
     .Dashboard > .body > .logo {
         margin-top: 9vh;
     }
-    .Dashboard > .profileBtn {
+    .Dashboard > .dashboardActions {
         top: 3vh;
     }
 }
