@@ -27,7 +27,31 @@ const accessTokenExpireTime = '12h';
 module.exports = accessTokenExpireTime;
 
 // Middlewares
-app.use(cors());
+app.use((req, res, next) => {
+    const origin = req.headers.origin || req.headers.referer;
+    const allowedOrigins = [
+        'http://localhost:3001',
+        'http://localhost:3000',
+        'https://www.keypassguard.com',
+        'https://keypassguard.com',
+    ];
+
+    const isChromeExtensionOrigin = typeof origin === 'string' && origin.startsWith('chrome-extension://');
+    const isAllowedOrigin = typeof origin === 'string' && allowedOrigins.includes(origin.replace(/\/$/, ''));
+
+    if (isChromeExtensionOrigin || isAllowedOrigin || !origin) {
+        res.setHeader('Access-Control-Allow-Origin', origin || '*');
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
+        res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+    }
+
+    if (req.method === 'OPTIONS') {
+        return res.sendStatus(200);
+    }
+
+    next();
+});
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(__dirname + '/client/build'));
@@ -106,7 +130,9 @@ const adminRoute = require('./routes/admin');
 app.use('/admin', adminRoute);
 
 const getUserInfo = require('./routes/util/getUserInfo');
+const extensionRoute = require('./routes/extension');
 
+app.use('/api', extensionRoute);
 
 app.post('/auth', authToken, async (req, res) => {
 
@@ -208,8 +234,6 @@ mongoose.connect(process.env.MONGODB_URI).then(() => {
 
 function authToken(req, res, next) {
     const token = req.body?.jsonWebToken || req.cookies['auth-token'];
-    console.log("Token received");
-    console.log(token);
     if (!token) return res.status(401).json({message: 'No authentication provided! Redirecting to login...'});
     jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
         if (err) return res.status(403).json({message: 'Error logging in. Incorrect information provided.'})

@@ -1,0 +1,245 @@
+* {
+    box-sizing: border-box;
+    scrollbar-width: thin;
+    scrollbar-color: #4a7c59 #192a32;
+}
+
+*::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+    background: #192a32;
+    border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb {
+    background: #4a7c59;
+    border: 1px solid #192a32;
+    border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background: #75b2d6;
+}
+
+body {
+    width: 340px;
+    min-height: 210px;
+    max-height: 580px;
+    margin: 0;
+    background: #051923;
+    color: #fff;
+    font-family: 'IBM Plex Mono', 'Courier New', monospace;
+}
+
+.app {
+    display: flex;
+    max-height: 580px;
+    flex-direction: column;
+    padding: 22px;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid #192a32;
+}
+
+.brand-logo {
+    display: block;
+    width: 170px;
+    height: auto;
+}
+
+.status-pill {
+    flex: 0 0 auto;
+    padding: 5px 9px;
+    border: 1px solid #622828;
+    border-radius: 999px;
+    background: #622828;
+    color: #e88888;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.status-pill.online {
+    border-color: #286243;
+    background: #286243;
+    color: #88e8b4;
+}
+
+.content {
+    display: flex;
+    min-height: 0;
+    flex: 1;
+    flex-direction: column;
+    gap: 12px;
+    padding-top: 20px;
+}
+
+.message {
+    margin: 0;
+    color: #c0c0c0;
+    font-size: 12px;
+    line-height: 1.65;
+}
+
+.button {
+    min-height: 38px;
+    padding: 8px 14px;
+    border: 1px solid #75b2d6;
+    border-radius: 999px;
+    background: transparent;
+    color: #fff;
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+}
+
+.button:hover {
+    background: #053147;
+}
+
+.match-panel {
+    display: grid;
+    gap: 8px;
+}
+
+.match-heading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.match-badge {
+    padding: 4px 8px;
+    border: 1px solid #286243;
+    border-radius: 999px;
+    background: #173a2b;
+    color: #88e8b4;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.match-caption,
+.match-hint {
+    color: #a1a1a1;
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+.no-match {
+    display: grid;
+    gap: 3px;
+    padding: 11px;
+    border: 1px solid #263a43;
+    border-radius: 9px;
+    background: #192a32;
+}
+
+.matched-site-card {
+    border-color: #286243;
+    background: #102b2b;
+}
+
+.vault-panel {
+    display: flex;
+    min-height: 0;
+    flex: 1;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#site-search {
+    width: 100%;
+    min-height: 38px;
+    padding: 8px 11px;
+    border: 1px solid #75b2d6;
+    border-radius: 9px;
+    outline: none;
+    background: #192a32;
+    color: #fff;
+    font: inherit;
+    font-size: 12px;
+}
+
+#site-search::placeholder {
+    color: #a1a1a1;
+}
+
+.site-list {
+    display: grid;
+    min-height: 0;
+    flex: 1;
+    gap: 8px;
+    max-height: 230px;
+    overflow-y: auto;
+}
+
+.site-card {
+    display: grid;
+    gap: 7px;
+    padding: 10px;
+    border: 1px solid #263a43;
+    border-radius: 9px;
+    background: #192a32;
+}
+
+.site-name {
+    overflow-wrap: anywhere;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.site-meta {
+    overflow-wrap: anywhere;
+    color: #a1a1a1;
+    font-size: 10px;
+}
+
+.site-actions {
+    display: flex;
+    gap: 7px;
+}
+
+.site-actions button {
+    flex: 1;
+    min-height: 30px;
+    padding: 5px 8px;
+    border: 1px solid #75b2d6;
+    border-radius: 999px;
+    background: transparent;
+    color: #fff;
+    font: inherit;
+    font-size: 10px;
+    cursor: pointer;
+}
+
+.site-actions button:hover {
+    background: #053147;
+}
+
+.site-actions button:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+}
+
+.empty-state {
+    padding: 12px 4px;
+    color: #a1a1a1;
+    font-size: 11px;
+    line-height: 1.5;
+    text-align: center;
+}
+
+.hidden {
+    display: none !important;
+}

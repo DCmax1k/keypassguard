@@ -1,14 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Keypass Guard Extension</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Keypass Guard</title>
+    <link rel="stylesheet" href="popup.css" />
 </head>
 <body>
-    
+    <main class="app">
+        <header class="header">
+            <img class="brand-logo" src="assets/logo.svg" alt="Keypass Guard" />
+            <span id="status-pill" class="status-pill">Offline</span>
+        </header>
 
+        <section class="content">
+            <p id="status-text" class="message" aria-live="polite">
+                Sign in to Keypass Guard on the website. This extension will detect your session automatically.
+            </p>
+            <a id="open-vault" class="button" href="https://www.keypassguard.com/">Open Keypass Guard</a>
+            <section id="match-panel" class="match-panel hidden" aria-live="polite"></section>
+            <button id="view-all-sites" class="button hidden" type="button" aria-expanded="false">View all sites</button>
+            <section id="vault-panel" class="vault-panel hidden">
+                <input id="site-search" type="search" placeholder="Search saved sites" aria-label="Search saved sites" />
+                <div id="site-list" class="site-list" aria-live="polite"></div>
+            </section>
+        </section>
+    </main>
+    <script src="popup.js"></script>
 </body>
-
-<script src="script.js"></script>
 </html>

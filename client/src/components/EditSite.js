@@ -189,6 +189,8 @@ class EditSite extends Component {
     }
 
     render() {
+        const showUrlAction = !this.state.inputsLocked || Boolean(this.state.url);
+
         return (
             <div className={`EditSite ${this.props.open ? 'open' : 'closed'}`} >
                 <div className='body'>
@@ -207,18 +209,16 @@ class EditSite extends Component {
                         <span>Note</span>
                         <LockedInput className='note' value={this.state.note} onInput={this.changeNote} placeholder={''} type={'textarea'} customAlert={this.props.customAlert} copy={false} locked={this.state.inputsLocked} />
                     </div>
-                    {(!this.state.inputsLocked || this.state.url) && (
-                        <div className='row urlAction'>
-                            <button type='button' onClick={() => this.addUrl()} className='addUrlButton' aria-expanded={this.state.showUrl}>
-                                {this.state.showUrl ? (
-                                    <span key='url-minus' className='minusIcon' aria-hidden='true' />
-                                ) : (
-                                    <img key='url-plus' src='/images/icons/plus.png' alt='' />
-                                )}
-                                <span>URL</span>
-                            </button>
-                        </div>
-                    )}
+                    <div className={`row urlAction ${showUrlAction ? '' : 'hidden'}`} aria-hidden={!showUrlAction}>
+                        <button type='button' onClick={() => this.addUrl()} className='addUrlButton' aria-expanded={this.state.showUrl} tabIndex={showUrlAction ? 0 : -1}>
+                            {this.state.showUrl ? (
+                                <span key='url-minus' className='minusIcon' aria-hidden='true' />
+                            ) : (
+                                <img key='url-plus' src='/images/icons/plus.png' alt='' />
+                            )}
+                            <span>URL</span>
+                        </button>
+                    </div>
                     <div className={`row urlRow ${this.state.showUrl ? 'visible' : 'hidden'}`} aria-hidden={!this.state.showUrl}>
                             <span>URL</span>
                             <LockedInput className='url' value={this.state.url} onInput={(url) => this.changeUrl(url)} placeholder={'https://example.com'} type={'text'} customAlert={this.props.customAlert} copy={false} locked={this.state.inputsLocked || !this.state.showUrl} />

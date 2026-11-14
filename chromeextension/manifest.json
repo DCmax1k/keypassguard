@@ -1,20 +1,39 @@
 {
     "name": "Keypass Guard",
     "version": "0.1.0",
-    "description": "Securly retain your passwords",
-    "permissions": ["storage", "tabs"],
-    "author": "Dylan Caldwell",
+    "description": "Securely store and auto-fill your passwords.",
+    "manifest_version": 3,
+    "permissions": [
+        "storage",
+        "tabs",
+        "activeTab",
+        "scripting",
+        "cookies"
+    ],
+    "host_permissions": [
+        "<all_urls>",
+        "http://localhost:3000/*",
+        "http://localhost:3001/*",
+        "https://www.keypassguard.com/*",
+        "https://*.keypassguard.com/*"
+    ],
+    "background": {
+        "service_worker": "background.js"
+    },
     "content_scripts": [
         {
             "matches": ["<all_urls>"],
-            "js": ["contentScript.js"]
+            "js": ["content.js"],
+            "run_at": "document_idle",
+            "all_frames": false
         }
     ],
     "web_accessible_resources": [
         {
             "resources": [
-                "assets/wahtever.png"
-            ]
+                "assets/ext-icon.png"
+            ],
+            "matches": ["<all_urls>"]
         }
     ],
     "action": {
@@ -26,5 +45,9 @@
         "default_title": "Keypass Guard",
         "default_popup": "index.html"
     },
-    "manifest_version": 3
+    "icons": {
+        "16": "assets/ext-icon.png",
+        "24": "assets/ext-icon.png",
+        "32": "assets/ext-icon.png"
+    }
 }

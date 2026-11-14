@@ -216,6 +216,14 @@
     justify-content: flex-start;
     margin-top: 0;
     margin-bottom: 0;
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+.EditSite > .body > .row.urlAction.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
 }
 .EditSite > .body > .row.noteRow {
     margin-bottom: 1vh;
