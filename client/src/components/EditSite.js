@@ -11,6 +11,8 @@ class EditSite extends Component {
             username: '',
             password: '',
             note: '',
+            url: '',
+            showUrl: false,
 
             inputsLocked: true,
             encrypted: true,
@@ -36,6 +38,8 @@ class EditSite extends Component {
             username: site.username,
             password: site.password,
             note: site.note,
+            url: site.url || '',
+            showUrl: Boolean(site.url),
 
             // Reset etc state
             inputsLocked: true,
@@ -57,6 +61,7 @@ class EditSite extends Component {
             username: this.state.username,
             password: this.state.password,
             note: this.state.note,
+            url: this.state.url,
         }
     }
 
@@ -80,6 +85,17 @@ class EditSite extends Component {
             note,
         });
     }
+    changeUrl(url) {
+        this.setState({
+            url,
+        });
+    }
+
+    addUrl() {
+        this.setState({
+            showUrl: !this.state.showUrl,
+        });
+    }
 
     goBack(skip) {
         if (!skip && !this.state.inputsLocked) {
@@ -101,6 +117,9 @@ class EditSite extends Component {
             console.log('worked..: ', worked);
             if (worked) {
                 this.props.customAlert('Successfully saved site.', true);
+                this.setState({
+                    showUrl: Boolean(this.state.url),
+                });
             } else {
                 this.props.customAlert('Error occured. Please try again later.', false);
             }
@@ -113,7 +132,8 @@ class EditSite extends Component {
                     encrypted: false,
                 });
             } else {
-                await this.requestdecrypt(this.state);
+                const password = await this.requestdecrypt(this.state);
+                if (password === null) return;
             }
             
         }
@@ -138,10 +158,12 @@ class EditSite extends Component {
                 
                 } else {
                     this.props.customAlert('Failed to request password.', false);
+                    return null;
                 }
             } catch(err) {
                 console.error(err);
                 this.props.customAlert('Internal error. ' + err, false);
+                return null;
             }
         } else {
             return this.state.password;
@@ -170,7 +192,6 @@ class EditSite extends Component {
         return (
             <div className={`EditSite ${this.props.open ? 'open' : 'closed'}`} >
                 <div className='body'>
-                    <img onClick={() => this.goBack(false)} className={'leftArrow ' + true} src='/images/icons/arrowRight.svg' alt='Left arrow' />
                     <div className='row full'>
                         <LockedInput className='siteName' value={this.state.name} onInput={this.changeName} placeholder={'ex. Keypass Guard'} type={'text'} customAlert={this.props.customAlert} copy={false} locked={this.state.inputsLocked} />
                     </div>
@@ -182,14 +203,31 @@ class EditSite extends Component {
                         <span>Password</span>
                         <LockedInput className='password' value={this.state.password} ref={this.passwordRef} onInput={this.changePassword} placeholder={''} type={'password'} wand={true} customAlert={this.props.customAlert} requestdecrypt={this.requestdecrypt} copy={true} locked={this.state.inputsLocked} site={this.state} encrypted={this.state.encrypted} />
                     </div>
-                    <div className='row'>
+                    <div className='row noteRow'>
                         <span>Note</span>
                         <LockedInput className='note' value={this.state.note} onInput={this.changeNote} placeholder={''} type={'textarea'} customAlert={this.props.customAlert} copy={false} locked={this.state.inputsLocked} />
                     </div>
-                    <div className='row'>
-                        <div></div>
-                        <div onClick={() => this.unlockEdit(false)} className='hollowBtn'>{this.state.inputsLocked ? "Edit" : "Save"}</div>
+                    {(!this.state.inputsLocked || this.state.url) && (
+                        <div className='row urlAction'>
+                            <button type='button' onClick={() => this.addUrl()} className='addUrlButton' aria-expanded={this.state.showUrl}>
+                                {this.state.showUrl ? (
+                                    <span key='url-minus' className='minusIcon' aria-hidden='true' />
+                                ) : (
+                                    <img key='url-plus' src='/images/icons/plus.png' alt='' />
+                                )}
+                                <span>URL</span>
+                            </button>
+                        </div>
+                    )}
+                    <div className={`row urlRow ${this.state.showUrl ? 'visible' : 'hidden'}`} aria-hidden={!this.state.showUrl}>
+                            <span>URL</span>
+                            <LockedInput className='url' value={this.state.url} onInput={(url) => this.changeUrl(url)} placeholder={'https://example.com'} type={'text'} customAlert={this.props.customAlert} copy={false} locked={this.state.inputsLocked || !this.state.showUrl} />
+                    </div>
+                    <div className='row siteActions'>
+                        <img onClick={() => this.goBack(false)} className={'leftArrow ' + true} src='/images/icons/arrowRight.svg' alt='Back' />
+                        <div className='siteActionsSpacer'></div>
                         <img onClick={this.deleteSite} className={'trash ' + this.state.inputsLocked} src='/images/icons/trash.svg' alt='delete site' />
+                        <div onClick={() => this.unlockEdit(false)} className='hollowBtn'>{this.state.inputsLocked ? "Edit" : "Save"}</div>
                     </div>
                     
                 </div>

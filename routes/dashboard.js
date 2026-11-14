@@ -27,6 +27,7 @@ router.post('/addsite', authToken, async (req, res) => {
             username: '',
             password: '',
             note: '',
+            url: '',
         }
         user.sites.push(newSite);
         await user.save();
@@ -72,6 +73,7 @@ router.post('/editsite', authToken, async (req, res) => {
             sites[ind] = {
                 ...req.body.site,
                 password: encryptedPassword,
+                url: req.body.site.url ?? sites[ind].url ?? '',
             };
         } else {
             console.error('Couldnt find site!');
@@ -114,6 +116,7 @@ router.post('/savesite', authToken, async (req, res) => {
                 username: site.username,
                 password: encryptedPassword,
                 note: site.note,
+                url: site.url ?? '',
             }
             user.sites.push(newSite);
             user.markModified("sites");
@@ -135,6 +138,7 @@ router.post('/savesite', authToken, async (req, res) => {
                     username: site.username,
                     password: encryptedPassword,
                     note: site.note,
+                    url: site.url ?? sites[ind].url ?? '',
                 };
                 user.sites = sites;
                 user.markModified("sites");
@@ -157,19 +161,19 @@ router.post('/savesite', authToken, async (req, res) => {
 router.post('/requestdecrypt', authToken, async (req, res) => {
     try {
         const user = await User.findById(req.userId);
+        if (!user) {
+            return res.status(404).json({status: 'error', message: 'No user!'});
+        }
         const site = req.body.site;
         const sites = user.sites;
         const ind = sites.findIndex((s) => {return s.id === site.id});
+        if (ind < 0) {
+            return res.status(404).json({status: 'error', message: 'No site with provided id!'});
+        }
 
-        let data;
-
-        // if (site.password.length === 0) {
-        //     data = "";
-        // } else {
-            const decrypted = cryptr.decrypt(sites[ind].password);
-
-            data = btoa(decrypted);
-        // }
+        const encryptedPassword = sites[ind].password;
+        const decrypted = encryptedPassword ? cryptr.decrypt(encryptedPassword) : "";
+        const data = btoa(decrypted);
 
         res.json({
             status: 'success',

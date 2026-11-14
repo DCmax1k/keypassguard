@@ -132,18 +132,25 @@
     height: 88vh;
     width: 100%;
     position: fixed;
+    z-index: 2;
     bottom: 0;
     left: 0;
     background-color: #051923;
-    transition: transform 0.3s ease;
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.3s ease, opacity 0.3s ease;
     padding-top: 5vh;
 
 }
 .EditSite.open {
     transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
 }
 .EditSite.closed {
     transform: translateY(100%);
+    opacity: 0;
+    pointer-events: none;
 }
 
 .EditSite > .body {
@@ -155,7 +162,7 @@
     align-items: center;
     position: relative;
 }
-.EditSite > .body > .leftArrow {
+.EditSite > .body > .siteActions > .leftArrow {
     position: absolute;
     left: -10vh;
     top: 4vh;
@@ -167,11 +174,11 @@
 
     transition: opacity 0.3s ease;
 }
-.EditSite > .body > .leftArrow.true {
+.EditSite > .body > .siteActions > .leftArrow.true {
     opacity: 1;
     pointer-events: all;
 }
-.EditSite.closed > .body > .leftArrow {
+.EditSite.closed > .body > .siteActions > .leftArrow {
     opacity: 0;
     pointer-events: none;
 }
@@ -183,8 +190,17 @@
     justify-content: space-between;
     margin-bottom: 3vh;
 }
-.EditSite > .body > .row > .trash {
-    position: absolute;
+.EditSite > .body > .siteActions {
+    position: static;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 2vh;
+}
+.EditSite > .body > .siteActions > .siteActionsSpacer {
+    flex: 1;
+}
+.EditSite > .body > .siteActions > .trash {
+    position: static;
     height: 4vh;
     width: 4vh;
     border-radius: 50%;
@@ -192,10 +208,59 @@
     opacity: 1;
     transition: opacity 0.3s ease;
     cursor: pointer;
-    right: 17vh;
 }
-.EditSite > .body > .row > .trash.true {
+.EditSite > .body > .siteActions > .trash.true {
     opacity: 0;
+}
+.EditSite > .body > .row.urlAction {
+    justify-content: flex-start;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+.EditSite > .body > .row.noteRow {
+    margin-bottom: 1vh;
+}
+.EditSite > .body > .row.urlRow {
+    max-height: 0;
+    min-height: 0;
+    margin-bottom: 0;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transition: max-height 0.3s ease, margin-bottom 0.3s ease, opacity 0.2s ease;
+}
+.EditSite > .body > .row.urlRow.visible {
+    max-height: 24vh;
+    margin-bottom: 3vh;
+    opacity: 1;
+    pointer-events: auto;
+}
+.EditSite .addUrlButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6vh;
+    padding: 0.5vh 1vh;
+    border: 0;
+    background: transparent;
+    color: white;
+    font: inherit;
+    font-size: 2vh;
+    cursor: pointer;
+}
+.EditSite .addUrlButton > img {
+    height: 1.8vh;
+    width: 1.8vh;
+    animation: urlIconFade 0.2s ease;
+}
+.EditSite .addUrlButton > .minusIcon {
+    height: 2px;
+    width: 1.8vh;
+    background-color: white;
+    animation: urlIconFade 0.2s ease;
+}
+@keyframes urlIconFade {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 .EditSite > .body > .row.full .LockedInput {
@@ -273,6 +338,12 @@
     padding-left: 2vh;
 
     transition: color 0.3s ease;
+}
+.EditSite .LockedInput.url > input {
+    font-size: 1.8vh;
+}
+.EditSite .LockedInput.url > .placeholder {
+    font-size: 1.8vh;
 }
 .EditSite .LockedInput > textarea {
     background-color: transparent;
@@ -449,9 +520,34 @@
     cursor: pointer;
 }
 @media screen and (max-width: 1000px) {
-    .EditSite > .body > .leftArrow {
-        left: 0vh;
-        top: 3vh;
+    .EditSite {
+        top: 0;
+        bottom: 0;
+        height: 100vh;
+        height: 100dvh;
+        box-sizing: border-box;
+        overflow: hidden;
+        padding-top: max(12px, env(safe-area-inset-top, 0px));
+    }
+
+    .EditSite > .body {
+        width: 90vw;
+        height: 100%;
+        max-height: 100%;
+        min-height: 0;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        box-sizing: border-box;
+        padding: 1vh 0 max(2vh, env(safe-area-inset-bottom, 0px));
+    }
+
+    .EditSite > .body > .siteActions > .leftArrow {
+        position: static;
+        left: auto;
+        top: auto;
+        height: 5vh;
+        transform: rotate(180deg) scale(0.7);
+        z-index: 1;
     }
 }
 
@@ -460,11 +556,32 @@
         width: 80vw;
     }
     .EditSite > .body {
-        width: 80vw;
+        width: 90vw;
     }
 
     .EditSite > .body > .row {
+        flex-shrink: 0;
         margin-bottom: 8vh;
+    }
+    .EditSite > .body > .siteActions {
+        order: -1;
+        position: sticky;
+        top: 0;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 5vh;
+        padding: 0.5vh 0;
+        background-color: #051923;
+        z-index: 2;
+    }
+    .EditSite > .body > .row.urlRow.visible {
+        margin-bottom: 1vh;
+    }
+    .EditSite > .body > .row.urlRow.hidden {
+        margin-bottom: 0;
+    }
+    .EditSite > .body > .row.noteRow {
+        margin-bottom: 1vh;
     }
     .EditSite > .body > .row > span {
         position: absolute;
@@ -475,11 +592,10 @@
     .EditSite .LockedInput {
         width: 100%;
     }
-
-    .EditSite > .body > .leftArrow {
-        transform: translateY(65vh) rotate(180deg) scale(0.6);
-        z-index: 1;
+    .EditSite .addUrlButton {
+        font-size: 2vh;
     }
+
     .Dashboard > .body > .logo {
         margin-top: 9vh;
     }

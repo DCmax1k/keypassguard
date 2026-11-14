@@ -22,7 +22,7 @@ class LockedInput extends Component {
     async showPassword() {
         const decrypted = await this.props.requestdecrypt(this.props.site);
 
-        if (decrypted) {
+        if (decrypted !== null && decrypted !== undefined) {
             this.setState({
                 showPassword: !this.state.showPassword,
             });
@@ -38,7 +38,7 @@ class LockedInput extends Component {
     async copyToClipboard() {
         if (this.props.type === 'password' && this.props.encrypted) {
             const pswd = await this.props.requestdecrypt();
-            if (pswd) {
+            if (pswd !== null && pswd !== undefined) {
                 navigator.clipboard.writeText(pswd);
                 this.props.customAlert('Copied to clipboard.', true);
                 return;
@@ -105,9 +105,9 @@ class LockedInput extends Component {
             <div className={'LockedInput ' + this.props.className + (this.props.type === 'textarea' ? ' textarea':' input')} style={{width: this.props.width}}>
                 <div className='placeholder' style={{color: this.props.value ? this.props.value.length > 0 ? "transparent" : "#B4D0DF" : "#B4D0DF"}}>{this.props.placeholder}</div>
                 {this.props.type === 'textarea' ? (
-                    <textarea onInput={this.onInput} rows={4} value={value} style={{pointerEvents: this.props.locked ? "none" : "all", color: this.props.locked ? "#4984A4" : "white"}} />
+                    <textarea onInput={this.onInput} rows={4} value={value} tabIndex={this.props.locked ? -1 : undefined} style={{pointerEvents: this.props.locked ? "none" : "all", color: this.props.locked ? "#4984A4" : "white"}} />
                 ) : (
-                    <input type={this.state.showPassword ? "text" : this.props.type} onInput={this.onInput} value={value} style={{pointerEvents: this.props.locked ? "none" : "all", color: this.props.locked ? "#4984A4" : "white"}} />
+                    <input type={this.state.showPassword ? "text" : this.props.type} onInput={this.onInput} value={value} tabIndex={this.props.locked ? -1 : undefined} style={{pointerEvents: this.props.locked ? "none" : "all", color: this.props.locked ? "#4984A4" : "white"}} />
                 )}
                 <img onClick={this.showPassword} className='eye' style={{display: this.props.type === "password" ? "block" : "none"}} src='/images/icons/eye.svg' alt='eye'/>
                 <img className={'copy ' + this.state.copied} onClick={this.copyToClipboard} style={{display: this.props.copy ? "block" : "none"}} src='/images/icons/copy.svg' alt='copy to clipboard' />
