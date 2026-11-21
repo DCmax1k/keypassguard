@@ -280,7 +280,5 @@ brandLogoButton.addEventListener('click', () => {
 });
 
 queryActiveTab().then((pageUrl) => {
-    chrome.runtime.sendMessage({ type: 'prepareActiveTab' }, () => {
-        loadSession(pageUrl);
-    });
+    loadSession(pageUrl);
 });

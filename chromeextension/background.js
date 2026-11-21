@@ -575,26 +575,6 @@ async function ensureContentScript(tabId) {
     }
 }
 
-async function saveVaultEntry(site) {
-    const token = await ensureAccessToken();
-    if (!token) {
-        throw new Error('Not authenticated');
-    }
-    const state = await getStoredState();
-
-    const { data } = await fetchJson('/api/extension/vault/save', {
-        method: 'POST',
-        headers: buildHeaders(token),
-        body: JSON.stringify({ site }),
-    }, state.apiBaseUrl);
-
-    if (!data || data.status !== 'success') {
-        throw new Error(data.message || 'Unable to save login');
-    }
-
-    return data.site;
-}
-
 function isPopupSender(sender) {
     return sender.id === chrome.runtime.id
         && !sender.tab
@@ -602,28 +582,11 @@ function isPopupSender(sender) {
         && sender.url.endsWith('/index.html');
 }
 
-function isCurrentPageUrl(sender, url) {
-    try {
-        return Boolean(sender.tab && sender.url && new URL(sender.url).origin === new URL(url).origin);
-    } catch (error) {
-        return false;
-    }
-}
-
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     const type = message && message.type;
 
     if (type === 'getSessionState') {
         getSessionState().then((state) => sendResponse(state)).catch((error) => sendResponse({ error: error.message || 'Unknown error' }));
-        return true;
-    }
-
-    if (type === 'getCredentials') {
-        if (!isCurrentPageUrl(sender, message.url)) {
-            sendResponse({ error: 'Credentials can only be checked for the current page.', entries: [] });
-            return false;
-        }
-        getVaultEntries(message.url).then((payload) => sendResponse(payload)).catch((error) => sendResponse({ error: error.message || 'Unable to load credentials', entries: [] }));
         return true;
     }
 
@@ -644,33 +607,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         fillSiteInActiveTab(message.site, message.field)
             .then((result) => sendResponse({ ok: true, ...result }))
             .catch((error) => sendResponse({ ok: false, error: error.message || 'Unable to fill this field.' }));
-        return true;
-    }
-
-    if (type === 'prepareActiveTab') {
-        if (!isPopupSender(sender)) {
-            sendResponse({ ok: false, error: 'This action is only available in the extension popup.' });
-            return false;
-        }
-        chrome.tabs.query({ active: true, currentWindow: true }).then(async ([tab]) => {
-            if (!tab || !tab.id || !/^https?:\/\//i.test(tab.url || '')) {
-                sendResponse({ ok: true });
-                return;
-            }
-            await ensureContentScript(tab.id);
-            sendResponse({ ok: true });
-        }).catch((error) => {
-            sendResponse({ ok: false, error: error.message || 'Unable to prepare the active page for autofill.' });
-        });
-        return true;
-    }
-
-    if (type === 'saveCredentials') {
-        if (!sender.tab || !isCurrentPageUrl(sender, message.site && message.site.url)) {
-            sendResponse({ ok: false, error: 'A login can only be saved for the current page.' });
-            return false;
-        }
-        saveVaultEntry(message.site).then((site) => sendResponse({ ok: true, site })).catch((error) => sendResponse({ ok: false, error: error.message || 'Unable to save' }));
         return true;
     }
 
