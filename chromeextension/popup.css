@@ -56,6 +56,19 @@ body {
     height: auto;
 }
 
+.brand-logo-button {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+.brand-logo-button:focus-visible {
+    outline: 2px solid #75b2d6;
+    outline-offset: 4px;
+}
+
 .status-pill {
     flex: 0 0 auto;
     padding: 5px 9px;
@@ -142,6 +155,11 @@ body {
     border: 1px solid #263a43;
     border-radius: 9px;
     background: #192a32;
+}
+
+.no-match .create-entry-button {
+    width: 100%;
+    margin-top: 7px;
 }
 
 .matched-site-card {

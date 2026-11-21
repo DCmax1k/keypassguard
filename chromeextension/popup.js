@@ -1,6 +1,7 @@
 const statusPill = document.getElementById('status-pill');
 const statusText = document.getElementById('status-text');
 const openVault = document.getElementById('open-vault');
+const brandLogoButton = document.getElementById('brand-logo-button');
 const matchPanel = document.getElementById('match-panel');
 const viewAllButton = document.getElementById('view-all-sites');
 const vaultPanel = document.getElementById('vault-panel');
@@ -168,12 +169,32 @@ function renderCurrentMatch(pageUrl) {
         `;
         wireFillButtons(matchPanel);
     } else {
+        let createUrl = '';
+        try {
+            const page = new URL(pageUrl);
+            if (/^https?:$/i.test(page.protocol)) {
+                const origin = page.origin;
+                const name = page.hostname.replace(/^www\./i, '');
+                createUrl = `${openVault.href.replace(/\/$/, '')}/dashboard?add=1&url=${encodeURIComponent(origin)}&name=${encodeURIComponent(name)}`;
+            }
+        } catch (error) {
+            createUrl = '';
+        }
+
         matchPanel.innerHTML = `
             <div class="no-match">
                 <span class="match-caption">No saved login matches this page yet.</span>
                 <span class="match-hint">Open all sites to choose another login.</span>
+                ${createUrl
+                    ? `<button type="button" class="button create-entry-button" data-create-url="${escapeHtml(createUrl)}">Create new entry for this site</button>`
+                    : ''}
             </div>
         `;
+        matchPanel.querySelectorAll('[data-create-url]').forEach((button) => {
+            button.addEventListener('click', () => {
+                chrome.tabs.create({ url: button.dataset.createUrl });
+            });
+        });
     }
 
     viewAllButton.classList.remove('hidden');
@@ -218,6 +239,7 @@ function loadSession(pageUrl) {
         }
 
         if (state && state.isAuthenticated) {
+            if (state.apiBaseUrl) openVault.href = state.apiBaseUrl;
             const isOnline = state.isOnline !== false;
             statusPill.textContent = isOnline ? 'Online' : 'Offline';
             statusPill.classList.toggle('online', isOnline);
@@ -250,6 +272,10 @@ searchInput.addEventListener('input', renderSites);
 
 openVault.addEventListener('click', (event) => {
     event.preventDefault();
+    chrome.tabs.create({ url: openVault.href });
+});
+
+brandLogoButton.addEventListener('click', () => {
     chrome.tabs.create({ url: openVault.href });
 });
 

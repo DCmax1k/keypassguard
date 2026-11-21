@@ -104,6 +104,9 @@ class EditSite extends Component {
                 return;
             }
         }
+        if (typeof this.props.discardSite === 'function') {
+            this.props.discardSite(this.state.id);
+        }
         this.props.goBack();
         this.setState({
             inputsLocked: true,

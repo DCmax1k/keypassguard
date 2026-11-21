@@ -5,6 +5,7 @@ import "./stylesheets/Index.css";
 import sendData from './util/sendData';
 import Login from './Login';
 import Signup from './Signup';
+import { getPendingCreateSearch } from './util/pendingCreate';
 
 class Index extends Component {
     constructor(props) {
@@ -32,7 +33,8 @@ class Index extends Component {
         try {
             const checkLogin = await sendData('/auth', {});
             if (checkLogin.status === 'success') {
-                window.location.href = '/dashboard';
+                const pendingSearch = getPendingCreateSearch();
+                window.location.href = pendingSearch ? `/dashboard${pendingSearch}` : '/dashboard';
             }
 
         } catch(err) {

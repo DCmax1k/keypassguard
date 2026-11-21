@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import sendData from './util/sendData';
 
 import Input from './Input';
+import { getPendingCreateSearch } from './util/pendingCreate';
 
 class Signup extends Component {
     constructor(props) {
@@ -49,7 +50,8 @@ class Signup extends Component {
             });
             const checkLogin = await sendData('/login/createaccount', {username: data.username, email: data.email, password: data.password});
             if (checkLogin.status === 'success') {
-                return window.location.href = '/dashboard';
+                const pendingSearch = getPendingCreateSearch();
+                return window.location.href = pendingSearch ? `/dashboard${pendingSearch}` : '/dashboard';
             }
             this.setState({
                 signupBtnText: 'Submit'

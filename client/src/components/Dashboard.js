@@ -4,6 +4,7 @@ import EditSite from './EditSite';
 import sendData from './util/sendData';
 import SideBar from './SideBar';
 import Loading from './Loading';
+import { savePendingCreateSearch, clearPendingCreateSearch } from './util/pendingCreate';
 
 
 // TESTING SITE PLACEHOLDER
@@ -45,11 +46,13 @@ class Dashboard extends Component {
         this.closeAlert = this.closeAlert.bind(this);
         this.customAlert = this.customAlert.bind(this);
         this.applyDecay = this.applyDecay.bind(this);
+        this.discardSite = this.discardSite.bind(this);
 
     }
 
     async componentDidMount() {
         try {
+            savePendingCreateSearch(window.location.search);
             const checkLogin = await sendData('/auth', {});
             //const checkLogin = {user: {username: 'DCmax1k', plus: false, sites, settings: {emailVerified: false,}, email: 'dylan@digitalcaldwell.com', },status: 'success',};
             if (checkLogin.status === 'success') {
@@ -63,6 +66,15 @@ class Dashboard extends Component {
                     setTimeout(() => {
                         this.setState({
                             loggedIn: true,
+                        }, () => {
+                            const params = new URLSearchParams(window.location.search);
+                            if (params.get('add') === '1') {
+                                const preferredUrl = params.get('url') || '';
+                                const preferredName = params.get('name') || '';
+                                this.addSite(preferredUrl, preferredName);
+                                window.history.replaceState({}, '', '/dashboard');
+                                clearPendingCreateSearch();
+                            }
                         });
                         setTimeout(() => {
                             this.setState({
@@ -76,12 +88,17 @@ class Dashboard extends Component {
                     loadingText: checkLogin.message,
                 });
                 setTimeout(() => {
-                    window.location.href = '/';
+                    const pendingSearch = window.location.search;
+                    savePendingCreateSearch(pendingSearch);
+                    window.location.href = `/${pendingSearch}`;
                 }, 2000);
             }
 
         } catch(err) {
             console.error(err);
+            const pendingSearch = window.location.search;
+            savePendingCreateSearch(pendingSearch);
+            window.location.href = `/${pendingSearch}`;
         }
     }
 
@@ -109,43 +126,62 @@ class Dashboard extends Component {
         let user = this.state.user;
         const sites = this.state.user.sites;
         let ind = sites.findIndex((s) => {return s.id === site.id});
-        sites[ind] = site;
-        user.sites = sites;
-        this.setState({
-            user,
-        });
         try {
-            const response = await sendData('/dashboard/editsite', {site});
+            const isProvisional = String(site.id || '').startsWith('unsaved-');
+            const provisionalIndex = isProvisional
+                ? ind
+                : -1;
+            const response = isProvisional
+                ? await sendData('/dashboard/savesite', {site: {...site, id: ''}})
+                : await sendData('/dashboard/editsite', {site});
             if (response.status === 'success') {
+                if (isProvisional) {
+                    site = response.site;
+                    if (provisionalIndex >= 0) {
+                        sites[provisionalIndex] = site;
+                        this.editSiteRef.current.setSite(site);
+                        ind = provisionalIndex;
+                    }
+                } else if (ind >= 0) {
+                    sites[ind] = site;
+                }
+                user.sites = sites;
+                this.setState({user});
                 return true;
             }
+            return false;
         } catch(err) {
             console.error(err);
             return false;
         }
-        return true;
     }
 
-    async addSite() {
-        try {
-            const response = await sendData('/dashboard/addsite', {});
-            if (response.status === 'success') {
-                const user = this.state.user;
-                const sites = this.state.user.sites;
-                const site = response.site;
-                sites.push(site);
-                user.sites = sites;
-                this.setState({
-                    user,
-                });
-                this.setSite(site);
-                this.editSiteRef.current.unlockEdit(true);
-            } else {
-                this.customAlert(response.message, false);
-            }
-        } catch(err) {
-            console.error(err);
-        }
+    async addSite(preferredUrl = '', preferredName = '') {
+        const site = {
+            id: `unsaved-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+            name: preferredName,
+            username: '',
+            password: '',
+            note: '',
+            url: preferredUrl,
+        };
+        const user = this.state.user;
+        const sites = this.state.user.sites;
+        sites.push(site);
+        user.sites = sites;
+        this.setState({user});
+        this.setSite(site);
+        this.editSiteRef.current.unlockEdit(true);
+    }
+
+    discardSite(siteId) {
+        if (!String(siteId || '').startsWith('unsaved-')) return;
+        const user = this.state.user;
+        user.sites = user.sites.filter((site) => site.id !== siteId);
+        this.setState({
+            user,
+            activeSite: null,
+        });
     }
 
     deleteSite(site) {
@@ -277,7 +313,7 @@ class Dashboard extends Component {
                     <h3>{this.state.user.sites.length} site key{this.state.user.sites.length === 1 ? '':'s'} secure</h3>
                     <div className='inputs'>
                         <SearchInput onInput={this.search} placeholder={"Search site"} />
-                        <div onClick={this.addSite} className='hollowBtn addSite'>Add site</div>
+                        <div onClick={() => this.addSite()} className='hollowBtn addSite'>Add site</div>
                     </div>
                     <div className='sites'>
                         {this.filterSites(this.state.user.sites).sort((a,b) => a.name === b.name ? 0 : a.name < b.name ? -1 : 1).map(site => {
@@ -303,7 +339,7 @@ class Dashboard extends Component {
                 <SideBar logout={this.logout} user={this.state.user} editUser={this.editUser} toggle={this.toggleSideBar} sideBar={this.state.sideBar} customAlert={this.customAlert} />
 
                 {/* Edit site */}
-                <EditSite ref={this.editSiteRef} open={this.state.siteOpen} goBack={this.toggleSiteWindow} updateParentSite={this.updateSite} deleteSite={this.deleteSite} customAlert={this.customAlert} />
+                <EditSite ref={this.editSiteRef} open={this.state.siteOpen} goBack={this.toggleSiteWindow} discardSite={this.discardSite} updateParentSite={this.updateSite} deleteSite={this.deleteSite} customAlert={this.customAlert} />
             </div>
         ) : (
             <Loading loadingText={this.state.loadingText} ref={this.loadingRef} />

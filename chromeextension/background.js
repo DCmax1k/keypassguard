@@ -139,7 +139,7 @@ async function getSessionState() {
                 method: 'POST',
                 signal: controller.signal,
             }, state.apiBaseUrl);
-            return { isAuthenticated: true, isOnline: true };
+            return { isAuthenticated: true, isOnline: true, apiBaseUrl: state.apiBaseUrl };
         } catch (error) {
             return {
                 isAuthenticated: true,
