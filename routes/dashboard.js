@@ -73,7 +73,7 @@ router.post('/editsite', authToken, async (req, res) => {
             sites[ind] = {
                 ...req.body.site,
                 password: encryptedPassword,
-                url: req.body.site.url ?? sites[ind].url ?? '',
+                url: String(req.body.site.url || '').trim(),
             };
         } else {
             console.error('Couldnt find site!');

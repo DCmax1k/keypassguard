@@ -47,8 +47,7 @@ function siteMatchesUrl(site, requestedUrl) {
         || requested.host.endsWith(`.${saved.host}`);
     if (!sameSite) return false;
 
-    if (saved.path === '/') return true;
-    return requested.path === saved.path || requested.path.startsWith(`${saved.path}/`);
+    return true;
 }
 
 function serializeSite(site) {
@@ -175,7 +174,7 @@ router.post('/extension/vault/save', authExtensionToken, async (req, res) => {
             return res.status(404).json({ status: 'error', message: 'User not found.' });
         }
 
-        const normalizedUrl = sitePayload.url.trim();
+        const normalizedUrl = String(sitePayload.url || '').trim();
         const entry = {
             id: sitePayload.id || generateUniqueId(),
             name: sitePayload.name || normalizedUrl,

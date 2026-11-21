@@ -1,6 +1,13 @@
+importScripts('constants/chromeExtensionConfig.js');
+
 const STORAGE_KEY = 'keypassguard_extension_state';
 const PRODUCTION_API = 'https://www.keypassguard.com';
-const LOCAL_API = 'http://localhost:3001';
+const LOCAL_API = KEYPASS_GUARD_EXTENSION_CONFIG.localhostApiBaseUrl;
+const CONFIGURED_API = KEYPASS_GUARD_EXTENSION_CONFIG.serverMode === 'production'
+    ? PRODUCTION_API
+    : KEYPASS_GUARD_EXTENSION_CONFIG.serverMode === 'localhost'
+        ? LOCAL_API
+        : null;
 const SESSION_COOKIE_URLS = [
     { url: 'http://localhost:3001', apiBaseUrl: LOCAL_API },
     { url: 'http://localhost:3000', apiBaseUrl: LOCAL_API },
@@ -153,9 +160,33 @@ async function getSessionState() {
 }
 
 async function getSiteSessionCookie() {
-    for (const source of SESSION_COOKIE_URLS) {
+    const state = await getStoredState();
+    const configuredFirstUrl = CONFIGURED_API || (KEYPASS_GUARD_EXTENSION_CONFIG.serverMode === 'auto'
+        ? state.apiBaseUrl
+        : null);
+    const serverMode = KEYPASS_GUARD_EXTENSION_CONFIG.serverMode;
+    const preferredSources = serverMode === 'production'
+        ? SESSION_COOKIE_URLS.filter((source) => source.apiBaseUrl === PRODUCTION_API)
+        : serverMode === 'localhost'
+            ? SESSION_COOKIE_URLS.filter((source) => source.apiBaseUrl === LOCAL_API)
+            : (
+                configuredFirstUrl
+                    ? [
+                        ...SESSION_COOKIE_URLS.filter((source) => source.apiBaseUrl === configuredFirstUrl),
+                        ...SESSION_COOKIE_URLS.filter((source) => source.apiBaseUrl !== configuredFirstUrl),
+                    ]
+                    : SESSION_COOKIE_URLS
+            );
+
+    for (const source of preferredSources) {
         const cookie = await new Promise((resolve) => {
-            chrome.cookies.get({ url: source.url, name: 'auth-token' }, resolve);
+            chrome.cookies.get({ url: source.url, name: 'extension-refresh-token' }, (refreshCookie) => {
+                if (refreshCookie && refreshCookie.value) {
+                    resolve(refreshCookie);
+                    return;
+                }
+                chrome.cookies.get({ url: source.url, name: 'auth-token' }, resolve);
+            });
         });
         if (cookie && cookie.value) return { ...source, cookie };
     }
@@ -197,14 +228,42 @@ async function refreshSessionFromCookie() {
 }
 
 chrome.cookies.onChanged.addListener((changeInfo) => {
-    if (changeInfo.cookie.name !== 'auth-token') return;
+    if (!['auth-token', 'extension-refresh-token'].includes(changeInfo.cookie.name)) return;
     const cookieDomain = changeInfo.cookie.domain.replace(/^\./, '');
     const isLocalhost = cookieDomain === 'localhost';
     const isKeypassGuard = cookieDomain === 'keypassguard.com'
         || cookieDomain === 'www.keypassguard.com'
         || cookieDomain.endsWith('.keypassguard.com');
     if (!isLocalhost && !isKeypassGuard) return;
-    refreshSessionFromCookie();
+    if (KEYPASS_GUARD_EXTENSION_CONFIG.serverMode === 'production' && isLocalhost) return;
+    if (KEYPASS_GUARD_EXTENSION_CONFIG.serverMode === 'localhost' && isKeypassGuard) return;
+    if (changeInfo.removed) {
+        refreshSessionFromCookie();
+        return;
+    }
+
+    const apiBaseUrl = isLocalhost ? LOCAL_API : PRODUCTION_API;
+    const cookieUrl = isLocalhost
+        ? (changeInfo.cookie.domain === 'localhost' ? 'http://localhost:3001' : 'http://localhost:3000')
+        : (cookieDomain === 'www.keypassguard.com' ? 'https://www.keypassguard.com' : 'https://keypassguard.com');
+
+    const adoptCookie = (refreshToken) => saveStoredState({
+        refreshToken,
+        apiBaseUrl,
+        accessToken: '',
+        expiresAt: 0,
+        isAuthenticated: true,
+    }).catch((error) => console.error('Unable to switch extension server:', error));
+
+    if (changeInfo.cookie.name === 'auth-token') {
+        chrome.cookies.get({ url: cookieUrl, name: 'extension-refresh-token' }, (refreshCookie) => {
+            adoptCookie(refreshCookie && refreshCookie.value
+                ? refreshCookie.value
+                : changeInfo.cookie.value);
+        });
+    } else {
+        adoptCookie(changeInfo.cookie.value);
+    }
 });
 
 chrome.runtime.onStartup.addListener(() => {
@@ -236,11 +295,7 @@ function siteMatchScore(site, requestedUrl) {
 
     const exactHost = saved.host === requested.host;
     if (!exactHost && !requested.host.endsWith(`.${saved.host}`)) return -1;
-    if (saved.path !== '/' && requested.path !== saved.path && !requested.path.startsWith(`${saved.path}/`)) {
-        return -1;
-    }
-
-    return (exactHost ? 100 : 50) + (saved.path === requested.path ? 20 : (saved.path === '/' ? 0 : 10));
+    return exactHost ? 100 : 50;
 }
 
 function siteMatchesUrl(site, requestedUrl) {
@@ -360,22 +415,139 @@ async function fillSiteInActiveTab(site, field) {
         password: field === 'password' ? await decryptSitePassword(site.id, state.apiBaseUrl) : '',
     };
 
-    const result = await new Promise((resolve, reject) => {
+    const framesFilled = await chrome.scripting.executeScript({
+        target: { tabId: tab.id, allFrames: true },
+        func: (credential) => {
+            const collectInputs = (root = document) => {
+                const inputs = [];
+                for (const element of root.querySelectorAll('*')) {
+                    if (element instanceof HTMLInputElement) inputs.push(element);
+                    if (element.shadowRoot) {
+                        inputs.push(...collectInputs(element.shadowRoot));
+                    }
+                }
+                return inputs;
+            };
+
+            const setValue = (field, value) => {
+                if (!field || !field.isConnected || !value) return false;
+                field.focus({ preventScroll: true });
+                const descriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
+                if (!descriptor || !descriptor.set) return false;
+                try {
+                    descriptor.set.call(field, value);
+                } catch (error) {
+                    return false;
+                }
+                field.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, cancelable: true }));
+                field.dispatchEvent(new InputEvent('beforeinput', {
+                    bubbles: true,
+                    cancelable: true,
+                    inputType: 'insertText',
+                    data: value,
+                }));
+                field.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
+                field.dispatchEvent(new Event('change', { bubbles: true, composed: true }));
+                field.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true, cancelable: true }));
+                return true;
+            };
+
+            const isUsableTextInput = (field) => (
+                field
+                && field.isConnected
+                && !field.disabled
+                && field.type !== 'hidden'
+                && field.type !== 'password'
+                && field.type !== 'checkbox'
+                && field.type !== 'radio'
+                && field.type !== 'submit'
+                && field.type !== 'button'
+                && field.getClientRects().length > 0
+            );
+
+            const isRecognizedUsernameInput = (field) => {
+                if (!isUsableTextInput(field)) return false;
+                const autocomplete = String(field.autocomplete || '').toLowerCase();
+                const name = String(field.name || '').toLowerCase();
+                const id = String(field.id || '').toLowerCase();
+                const type = String(field.type || '').toLowerCase();
+                const placeholder = String(field.placeholder || '').toLowerCase();
+                return autocomplete === 'username'
+                    || autocomplete === 'email'
+                    || type === 'email'
+                    || /email|username|userid|accountname|login|apple.?id/.test(`${name} ${id} ${placeholder}`);
+            };
+
+            if (credential.field === 'username') {
+                const activeField = document.activeElement;
+                const target = isRecognizedUsernameInput(activeField)
+                    ? activeField
+                    : null;
+                const usableFields = collectInputs(document);
+                const fallbackTarget = target
+                    || usableFields.find((field) => isRecognizedUsernameInput(field));
+                return setValue(fallbackTarget, credential.username) ? 1 : 0;
+            }
+
+            if (credential.field === 'password') {
+                const activeField = document.activeElement;
+                const target = activeField
+                    && activeField.isConnected
+                    && activeField.type === 'password'
+                    ? activeField
+                    : null;
+                const fallbackTarget = target
+                    || collectInputs(document).find((field) => (
+                        field
+                        && field.isConnected
+                        && !field.disabled
+                        && field.type === 'password'
+                        && field.getClientRects().length > 0
+                    ));
+                return setValue(fallbackTarget, credential.password) ? 1 : 0;
+            }
+
+            return 0;
+        },
+        args: [credential],
+    }).catch(() => []);
+
+    const didFillAcrossFrames = Array.isArray(framesFilled)
+        && framesFilled.some((frame) => frame && frame.result > 0);
+
+    let result = { ok: true };
+    if (!didFillAcrossFrames) {
+        result = await new Promise((resolve, reject) => {
         chrome.tabs.sendMessage(tab.id, {
             type: 'fillSelectedCredential',
             credential,
-        }, (response) => {
+        }, { frameId: 0 }, (response) => {
             if (chrome.runtime.lastError) {
-                reject(new Error('Reload the website tab before filling fields.'));
+                const copiedValue = credential.field === 'password'
+                    ? credential.password
+                    : credential.username;
+                resolve({
+                    ok: true,
+                    copiedValue,
+                    warning: `Copied ${credential.field} to clipboard. Reload the website tab if the field did not fill.`,
+                });
                 return;
             }
             if (!response || !response.ok) {
-                reject(new Error(response && response.error ? response.error : 'No matching input field is available.'));
+                const copiedValue = credential.field === 'password'
+                    ? credential.password
+                    : credential.username;
+                resolve({
+                    ok: true,
+                    copiedValue,
+                    warning: `Copied ${credential.field} to clipboard. It may not have filled on the page.`,
+                });
                 return;
             }
             resolve(response);
         });
-    });
+        });
+    }
 
     let warning = '';
     if (!site.url && tab.url && /^https?:\/\//i.test(tab.url)) {
@@ -452,21 +624,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             return false;
         }
         getVaultEntries(message.url).then((payload) => sendResponse(payload)).catch((error) => sendResponse({ error: error.message || 'Unable to load credentials', entries: [] }));
-        return true;
-    }
-
-    if (type === 'getPasswordForSite') {
-        if (!sender.tab || !sender.url) {
-            sendResponse({ ok: false, error: 'Passwords can only be requested by the current page.' });
-            return false;
-        }
-        const pageUrl = sender.url;
-        getVaultEntries(pageUrl).then(async ({ entries }) => {
-            const site = entries.find((entry) => entry.id === message.siteId);
-            if (!site) throw new Error('This saved login does not match the current page.');
-            const password = await decryptSitePassword(site.id);
-            sendResponse({ ok: true, credential: { username: site.username, password } });
-        }).catch((error) => sendResponse({ ok: false, error: error.message || 'Unable to load this password.' }));
         return true;
     }
 

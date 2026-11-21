@@ -61,7 +61,7 @@ class EditSite extends Component {
             username: this.state.username,
             password: this.state.password,
             note: this.state.note,
-            url: this.state.url,
+            url: String(this.state.url || '').trim(),
         }
     }
 

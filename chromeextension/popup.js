@@ -11,6 +11,12 @@ let savedSites = [];
 let currentMatch = null;
 let isExpanded = false;
 
+function setStatus(message) {
+    if (!statusText) return;
+    statusText.classList.remove('hidden');
+    statusText.textContent = String(message || '');
+}
+
 function escapeHtml(value) {
     return String(value || '')
         .replace(/&/g, '&amp;')
@@ -47,13 +53,7 @@ function matchScore(site, pageUrl) {
     const exactHost = savedHost === currentHost;
     if (!exactHost && !currentHost.endsWith(`.${savedHost}`)) return -1;
 
-    const savedPath = savedUrl.pathname.replace(/\/+$/, '') || '/';
-    const currentPath = currentUrl.pathname.replace(/\/+$/, '') || '/';
-    if (savedPath !== '/' && currentPath !== savedPath && !currentPath.startsWith(`${savedPath}/`)) {
-        return -1;
-    }
-
-    return (exactHost ? 100 : 50) + (savedPath === currentPath ? 20 : (savedPath === '/' ? 0 : 10));
+    return exactHost ? 100 : 50;
 }
 
 function getBestMatch(pageUrl) {
@@ -77,6 +77,24 @@ function createSiteCard(site, index, isMatch) {
     `;
 }
 
+async function copyToClipboard(value) {
+    if (!value) return false;
+    try {
+        await navigator.clipboard.writeText(value);
+        return true;
+    } catch (error) {
+        const textarea = document.createElement('textarea');
+        textarea.value = value;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        const copied = document.execCommand('copy');
+        textarea.remove();
+        return copied;
+    }
+}
+
 function wireFillButtons(root) {
     root.querySelectorAll('button[data-field]').forEach((button) => {
         button.addEventListener('click', () => {
@@ -92,13 +110,22 @@ function wireFillButtons(root) {
                 field: button.dataset.field,
             }, (response) => {
                 if (chrome.runtime.lastError) {
-                    statusText.textContent = 'Could not reach the active page. Reload that tab and try again.';
+                    setStatus('Could not reach the active page. Reload that tab and try again.');
                 } else if (!response || !response.ok) {
-                    statusText.textContent = response && response.error
+                    setStatus(response && response.error
                         ? response.error
-                        : 'Unable to fill the selected field.';
+                        : 'Unable to fill the selected field.');
                 } else {
-                    statusText.textContent = response.warning || `Filled ${button.dataset.field} on the active page.`;
+                    if (response.copiedValue) {
+                        setStatus(`Copied ${button.dataset.field} to clipboard.`);
+                        copyToClipboard(response.copiedValue).then((copied) => {
+                            setStatus(copied
+                                ? (response.warning || `Copied ${button.dataset.field} to clipboard.`)
+                                : `Could not copy ${button.dataset.field}. The page may not have accepted the fill.`);
+                        });
+                    } else {
+                        setStatus(response.warning || `Filled ${button.dataset.field} on the active page.`);
+                    }
                 }
 
                 button.disabled = false;
@@ -175,6 +202,8 @@ function queryActiveTab() {
             const activeUrl = tabs[0] && tabs[0].url;
             if (activeUrl && /^https?:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?\//i.test(activeUrl)) {
                 openVault.href = new URL(activeUrl).origin;
+            } else if (!openVault.href || openVault.href === 'https://www.keypassguard.com/') {
+                openVault.href = KEYPASS_GUARD_EXTENSION_CONFIG.apiBaseUrl;
             }
             resolve(activeUrl || '');
         });

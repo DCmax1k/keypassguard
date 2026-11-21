@@ -34,6 +34,22 @@ function validateUsername(username) {
     return username.length >= 1 && !username.includes("@");
 }
 
+function setExtensionSessionCookies(req, res, accessToken, refreshToken) {
+    const secure = req.hostname !== 'localhost' && req.hostname !== '127.0.0.1';
+    res.cookie('auth-token', accessToken, {
+        httpOnly: true,
+        secure,
+        sameSite: 'lax',
+        maxAge: 12 * 60 * 60 * 1000,
+    });
+    res.cookie('extension-refresh-token', refreshToken, {
+        httpOnly: true,
+        secure,
+        sameSite: 'lax',
+        maxAge: 30 * 24 * 60 * 60 * 1000,
+    });
+}
+
 
 const createAccount = async ({partyType, thirdPartyId, username, email, password}) => {
     if (!partyType) {
@@ -138,10 +154,8 @@ router.post('/createaccount', async (req, res) => {
         const userInfo = getUserInfo(user);
 
         const jwt_token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {expiresIn: accessTokenExpireTime}); // Access token - for all pings
-        let refresh_token = null;
-        if (req.body.hardwareLogin)
-            refresh_token = jwt.sign({ userId: user._id }, process.env.REFRESH_TOKEN_SECRET, {expiresIn: "30d"}); // Refresh token - for face id auth
-        res.cookie('auth-token', jwt_token, { httpOnly: true, expires: new Date(Date.now() + 12 * 60 * 60 * 1000) });
+        const refresh_token = jwt.sign({ userId: user._id }, process.env.REFRESH_TOKEN_SECRET, {expiresIn: "30d"});
+        setExtensionSessionCookies(req, res, jwt_token, refresh_token);
         res.json({
             status: 'success', 
             jsonWebToken: jwt_token,
@@ -238,9 +252,8 @@ router.post("/loginthirdparty", async (req, res) => {
     // Session token
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);
 
-    let refresh_token = null;
-    if (req.body.hardwareLogin)
-        refresh_token = jwt.sign({ userId: user._id }, process.env.REFRESH_TOKEN_SECRET, {expiresIn: "30d"}); // Refresh token - for face id auth
+    const refresh_token = jwt.sign({ userId: user._id }, process.env.REFRESH_TOKEN_SECRET, {expiresIn: "30d"});
+    setExtensionSessionCookies(req, res, token, refresh_token);
 
     return res.json({
             status: 'success',
@@ -273,10 +286,8 @@ router.post('/', async (req, res) => {
             });
         }
         const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {expiresIn: accessTokenExpireTime});
-        let refresh_token = null;
-        if (req.body.hardwareLogin)
-            refresh_token = jwt.sign({ userId: user._id }, process.env.REFRESH_TOKEN_SECRET, {expiresIn: "30d"}); // Refresh token - for face id auth
-        res.cookie('auth-token', token, { httpOnly: true, expires: new Date(Date.now() + 12 * 60 * 60 * 1000)});
+        const refresh_token = jwt.sign({ userId: user._id }, process.env.REFRESH_TOKEN_SECRET, {expiresIn: "30d"});
+        setExtensionSessionCookies(req, res, token, refresh_token);
 
         return res.json({
             status: 'success',
@@ -311,7 +322,9 @@ router.get('/verifyemail/:userid/:verifycode', async (req, res) => {
 
 router.post('/logout', authToken, async (req, res) => {
     try {
-        res.cookie('auth-token', '', { expires: new Date(0) }).json({ status: 'success' });
+        res.cookie('auth-token', '', { expires: new Date(0) });
+        res.cookie('extension-refresh-token', '', { expires: new Date(0) });
+        res.json({ status: 'success' });
     } catch(err) {
         console.error(err);
     }
