@@ -1,6 +1,6 @@
 {
     "name": "Keypass Guard",
-    "version": "0.1.0",
+    "version": "1.0.1",
     "description": "Securely store and auto-fill your passwords.",
     "manifest_version": 3,
     "permissions": [
@@ -12,8 +12,6 @@
     ],
     "host_permissions": [
         "<all_urls>",
-        "http://localhost:3000/*",
-        "http://localhost:3001/*",
         "https://www.keypassguard.com/*",
         "https://*.keypassguard.com/*"
     ],
